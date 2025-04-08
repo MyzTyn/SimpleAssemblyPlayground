@@ -1,13 +1,14 @@
 cmake_minimum_required(VERSION 3.11)
-project(IA32_Emulator)
+project(SimpleAssemblyPlayground)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Library Config #
-set(UNICORN_ARCH "X86") # UNICORN ONLY X86
+set(UNICORN_ARCH "x86") # UNICORN ONLY X86
 set(LLVM_TARGETS_TO_BUILD "X86") # Keystone
+set(CAPSTONE_ARCHITECTURE_DEFAULT OFF)
 set(CAPSTONE_X86_SUPPORT ON)
 
 # Add Unicorn Engine as a library
@@ -63,17 +64,17 @@ elseif (WIN32)
 endif()
 
 # Create the executable
-add_executable(ia32_emulator ${SOURCE_FILES} ${IMGUI_SRC})
+add_executable(SimpleAssemblyPlayground ${SOURCE_FILES} ${IMGUI_SRC})
 
 # macOS: Link Metal framework (move it here after `add_executable`)
 if (APPLE)
-    target_link_libraries(ia32_emulator "-framework Metal" "-framework MetalKit" "-framework Cocoa" "-framework GameController" "-framework QuartzCore" "-framework AppKit")
+    target_link_libraries(SimpleAssemblyPlayground "-framework Metal" "-framework MetalKit" "-framework Cocoa" "-framework GameController" "-framework QuartzCore" "-framework AppKit")
     # Mark several errors as warning to get it work
     target_compile_options(capstone PRIVATE -Wno-conversion -Wno-sign-compare -Wno-ignored-qualifiers -Wno-unused-parameter -Wno-missing-field-initializers)
 elseif (WIN32)
-    target_link_libraries(ia32_emulator d3d12.lib dxgi.lib d3dcompiler.lib dxguid.lib)
+    target_link_libraries(SimpleAssemblyPlayground d3d12.lib dxgi.lib d3dcompiler.lib dxguid.lib)
 endif()
 
 # Link against libs statically
-target_link_libraries(ia32_emulator unicorn keystone capstone)
+target_link_libraries(SimpleAssemblyPlayground unicorn keystone capstone)
 
