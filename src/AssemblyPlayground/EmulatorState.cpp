@@ -8,6 +8,7 @@
 #include "EmulatorState.h"
 
 #include "unicorn/unicorn.h"
+#include <stdexcept>
 
 int reg_ids[] = {
     UC_X86_REG_EAX,
