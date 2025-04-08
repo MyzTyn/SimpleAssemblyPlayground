@@ -1,0 +1,35 @@
+# macOS system files
+.DS_Store
+.vs/
+
+# CMake build directories
+build/
+
+# Compiled binaries and object files
+*.o
+*.a
+*.so
+*.out
+*.exe
+
+# CMake and IDE-specific files
+CMakeCache.txt
+CMakeFiles/
+Makefile
+*.cmake
+*.ninja
+
+# IDE files (e.g., for VSCode, Xcode, etc.)
+.vscode/
+.idea/
+*.xcodeproj
+*.xcworkspace
+
+# Debug and release directories
+Debug/
+Release/
+
+# Other system-specific or tool-specific files
+*.log
+*.swp
+
