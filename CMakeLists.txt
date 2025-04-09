@@ -6,10 +6,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Library Config #
-set(UNICORN_ARCH "x86") # UNICORN ONLY X86
-set(LLVM_TARGETS_TO_BUILD "X86") # Keystone
-set(CAPSTONE_ARCHITECTURE_DEFAULT OFF)
-set(CAPSTONE_X86_SUPPORT ON)
+set(UNICORN_ARCH "x86")                 # UNICORN ONLY X86
+
+set(LLVM_TARGETS_TO_BUILD "X86")        # Keystone
+set(BUILD_LIBS_ONLY ON)                 # Keystone
+set(CAPSTONE_ARCHITECTURE_DEFAULT OFF)  # Capstone
+set(CAPSTONE_X86_SUPPORT ON)            # Capstone
 
 # Add Unicorn Engine as a library
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/unicorn)
