@@ -18,6 +18,7 @@
 #include "capstone/capstone.h"
 
 #include "AppUI.h"
+#include "MiniKernel.h"
 
 #define MEMSIZE 0x2000
 #define REG_TOTAL 9
@@ -33,7 +34,8 @@ struct EmulatorState {
     ks_engine* ks;
     // Capstone
     csh capstone;
-    
+    MiniKernel kernel;
+
     // Registers
     std::array<uint32_t, REG_TOTAL> registers;
     std::array<void*, REG_TOTAL> registeres_ptrs;

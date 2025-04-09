@@ -144,7 +144,8 @@ void Disassembler::Draw() {
         ImGui::PopStyleVar();
         ImGui::PopFont();
         ImGui::EndChild();
-    } else {
+    }
+    else {
         ImGui::Text("No instructions disassembled");
     }
     
@@ -199,9 +200,9 @@ void Console::Draw(const char *title) {
     //    ImGui::SameLine();
     //    if (ImGui::SmallButton("Add Debug Error")) { AddLog("[error] something went wrong"); }
     //    ImGui::SameLine();
-    if (ImGui::SmallButton("Clear"))           { ClearLog(); }
-    ImGui::SameLine();
-    bool copy_to_clipboard = ImGui::SmallButton("Copy");
+//    if (ImGui::SmallButton("Clear"))           { ClearLog(); }
+//    ImGui::SameLine();
+//    bool copy_to_clipboard = ImGui::SmallButton("Copy");
     //static float t = 0.0f; if (ImGui::GetTime() - t > 0.02f) { t = ImGui::GetTime(); AddLog("Spam %f", t); }
     
     ImGui::Separator();
@@ -256,8 +257,8 @@ void Console::Draw(const char *title) {
         // - Split them into same height items would be simpler and facilitate random-seeking into your list.
         // - Consider using manual call to IsRectVisible() and skipping extraneous decoration from your items.
         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
-        if (copy_to_clipboard)
-            ImGui::LogToClipboard();
+//        if (copy_to_clipboard)
+//            ImGui::LogToClipboard();
         for (const char* item : Items)
         {
             if (!Filter.PassFilter(item))
@@ -275,8 +276,8 @@ void Console::Draw(const char *title) {
             if (has_color)
                 ImGui::PopStyleColor();
         }
-        if (copy_to_clipboard)
-            ImGui::LogFinish();
+//        if (copy_to_clipboard)
+//            ImGui::LogFinish();
         
         // Keep up at the bottom of the scroll region if we were already at the bottom at the beginning of the frame.
         // Using a scrollbar or mouse-wheel will take away from the bottom edge.
@@ -315,33 +316,33 @@ void Console::ExecCommand(const char *command_line) {
     
     // Insert into history. First find match and delete it so it can be pushed to the back.
     // This isn't trying to be smart or optimal.
-    HistoryPos = -1;
-    for (int i = History.Size - 1; i >= 0; i--)
-        if (Stricmp(History[i], command_line) == 0)
-        {
-            ImGui::MemFree(History[i]);
-            History.erase(History.begin() + i);
-            break;
-        }
-    History.push_back(Strdup(command_line));
+//    HistoryPos = -1;
+//    for (int i = History.Size - 1; i >= 0; i--)
+//        if (Stricmp(History[i], command_line) == 0)
+//        {
+//            ImGui::MemFree(History[i]);
+//            History.erase(History.begin() + i);
+//            break;
+//        }
+//    History.push_back(Strdup(command_line));
     
     // Process command
     if (Stricmp(command_line, "CLEAR") == 0)
     {
         ClearLog();
     }
-    else if (Stricmp(command_line, "HELP") == 0)
-    {
-        AddLog("Commands:");
-        for (int i = 0; i < Commands.Size; i++)
-            AddLog("- %s", Commands[i]);
-    }
-    else if (Stricmp(command_line, "HISTORY") == 0)
-    {
-        int first = History.Size - 10;
-        for (int i = first > 0 ? first : 0; i < History.Size; i++)
-            AddLog("%3d: %s\n", i, History[i]);
-    }
+//    else if (Stricmp(command_line, "HELP") == 0)
+//    {
+//        AddLog("Commands:");
+//        for (int i = 0; i < Commands.Size; i++)
+//            AddLog("- %s", Commands[i]);
+//    }
+//    else if (Stricmp(command_line, "HISTORY") == 0)
+//    {
+//        int first = History.Size - 10;
+//        for (int i = first > 0 ? first : 0; i < History.Size; i++)
+//            AddLog("%3d: %s\n", i, History[i]);
+//    }
     else
     {
         AddLog("Unknown command: '%s'\n", command_line);

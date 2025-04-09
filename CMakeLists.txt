@@ -68,7 +68,7 @@ endif()
 # Create the executable
 add_executable(SimpleAssemblyPlayground ${SOURCE_FILES} ${IMGUI_SRC})
 
-# macOS: Link Metal framework (move it here after `add_executable`)
+# macOS: Link frameworks
 if (APPLE)
     target_link_libraries(SimpleAssemblyPlayground "-framework Metal" "-framework MetalKit" "-framework Cocoa" "-framework GameController" "-framework QuartzCore" "-framework AppKit")
     # Mark several errors as warning to get it work

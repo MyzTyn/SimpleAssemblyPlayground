@@ -22,44 +22,12 @@ int reg_ids[] = {
     UC_X86_REG_EIP
 };
 
-// Syscall numbers
-#define SYS_EXIT 1
-#define SYS_WRITE 4
-
-//static void hook_mem_access(uc_engine *uc, uc_mem_type type, uint64_t address, int size, int64_t value, void *user_data) {
-//    printf("[MEM ACCESS] %s at 0x%llx, value: 0x%llx\n",
-//           (type == UC_MEM_WRITE) ? "WRITE" : "READ",
-//           address, value);
-//}
-
 // Hook to catch syscalls (Simple Kernel)
 void hook_syscall(uc_engine *uc, uint32_t intno, void *user_data) {
     EmulatorState* emulator_state = (EmulatorState*)user_data;
     emulator_state->update_registers();
     
-    uint32_t eax = emulator_state->registers[0];  // Get syscall number (EAX register)
-    
-    if (eax == SYS_WRITE) {
-        uint32_t fd = emulator_state->registers[1];  // EBX (file descriptor)
-        uint32_t buf = emulator_state->registers[2]; // ECX (buffer address)
-        uint32_t len = emulator_state->registers[3]; // EDX (length)
-        //        printf("[DEBUG] SYS_WRITE fd: %u, buf: 0x%X, len: %u\n", fd, buf, len);
-        
-        // Directly reference emulator state memory
-        char* data = reinterpret_cast<char*>(&emulator_state->memory[buf]);
-        // Print the data safely with length limitation
-        //        printf("%.*s", len, data);
-        emulator_state->console->AddLog("%.*s", len, data);
-    }
-    else if (eax == SYS_EXIT) {
-        uint32_t exit_code = emulator_state->registers[1]; // EBX (exit code)
-        //        printf("[SYSCALL] sys_exit called. Exit code: %d\n", exit_code);
-        emulator_state->console->AddLog("Program exited: %d", exit_code);
-        uc_emu_stop(uc); // Stop the emulation
-    }
-    else {
-        printf("[SYSCALL] Unknown syscall: %d\n", eax);
-    }
+    emulator_state->kernel.handle_syscall(emulator_state->registers[0], emulator_state);
 }
 
 EmulatorState::EmulatorState(): uc(nullptr), ks(nullptr), registers{}, registeres_ptrs{}, memory{}, ESP_Address(0x1500), EBP_Address(0x1500), StartAddress(0x200), END_ADDRESS(0) {
@@ -95,6 +63,9 @@ EmulatorState::EmulatorState(): uc(nullptr), ks(nullptr), registers{}, registere
     
     stack.reserve(10);
     stack.clear();
+    
+    // Load the default syscalls
+    kernel.default_linux_syscall();
 }
 
 EmulatorState::~EmulatorState() {
@@ -115,7 +86,6 @@ void EmulatorState::run() {
 }
 
 void EmulatorState::step() {
-    // Start the cpu
     uc_emu_start(uc, registers[8], END_ADDRESS, 0, 1);
     update_registers();
     read_stack();
@@ -129,6 +99,8 @@ void EmulatorState::reset() {
     registers[5] = EBP_Address;
     registers[8] = StartAddress;
     uc_reg_write_batch(uc, reg_ids, registeres_ptrs.data(), REG_TOTAL);
+    // Clear the cache (Seems fixed the bug: run once then step fn would act like run rather than step by step behaviour)
+    uc_ctl_remove_cache(uc, StartAddress, MEMSIZE);
     // Update it
     update_pc_fn(StartAddress);
     read_stack();
@@ -141,12 +113,13 @@ void EmulatorState::assemble(const char* value) {
     uint8_t *encode;
     
     // Compile the ASM code
-    if (ks_asm(ks, value, StartAddress, &encode, &size, &count) == KS_ERR_OK) {
-        console->AddLog("ASM code compiled! %zu bytes, statements: %zu", size, count);
+    if (ks_asm(ks, value, StartAddress, &encode, &size, &count) != KS_ERR_OK) {
+        console->AddLog("ASM code failed to compile!");
+        return;
     }
+    console->AddLog("ASM code compiled! %zu bytes, statements: %zu", size, count);
     
     END_ADDRESS = StartAddress + size;
-    
     // Set the memory to 0
     memory.fill(0);
     // Copy compiled code to memory_data (single copy)

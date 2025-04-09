@@ -73,7 +73,6 @@ result:
 
 static Console console;
 static Disassembler disassembler;
-// Define register IDs for batch reading
 static MemoryEditor mem_edit;
 
 // Register names
