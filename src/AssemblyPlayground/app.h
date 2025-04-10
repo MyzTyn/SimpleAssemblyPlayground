@@ -8,21 +8,20 @@
 #ifndef app_h
 #define app_h
 
-#include <stdio.h>
 #include "imgui.h"
+#include <stdio.h>
 
 class Application {
 public:
-    Application();
-    ~Application();
-    
-    void Render();
-    ImVec4& GetClearColor() {
-        return clear_color;
-    }
+  Application();
+  ~Application();
+
+  void Render();
+  ImVec4 &GetClearColor() { return clear_color; }
+
 private:
-    ImGuiIO& io;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  ImGuiIO &io;
+  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 };
 
 #endif /* app_h */
