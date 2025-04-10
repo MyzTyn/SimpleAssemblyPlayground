@@ -488,6 +488,7 @@ int main(int, char**)
 
     // Cleanup
     // ToDo: Remove Application
+    delete app;
     err = vkDeviceWaitIdle(g_Device);
     check_vk_result(err);
     ImGui_ImplVulkan_Shutdown();

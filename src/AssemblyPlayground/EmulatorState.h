@@ -25,7 +25,24 @@
 
 // ToDo: Remove the TEMPO and use bool based (state) to fetch any latest data
 
-// Struct for Emulator State
+struct ExecutableData {
+    // ## Configuration ##
+    uint32_t ESP_Address;
+    uint32_t EBP_Address;
+    uint32_t StartAddress;
+    uint64_t END_ADDRESS;
+    // Assembly Code
+    char* code;
+
+    // ## Bin ##
+    uint8_t* bin;
+    size_t bin_size;
+
+    // ## Disassemble ##
+    cs_insn* insns;
+    size_t* total_insns;
+};
+
 class EmulatorState {
 public:
     // ## Core ##

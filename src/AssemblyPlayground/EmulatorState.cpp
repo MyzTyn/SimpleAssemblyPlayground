@@ -72,7 +72,7 @@ EmulatorState::~EmulatorState() {
     uc_close(uc);
     ks_close(ks);
     cs_close(&capstone);
-    free(console);
+    console = NULL;
 }
 
 // run to the end
