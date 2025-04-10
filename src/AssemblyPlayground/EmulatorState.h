@@ -26,7 +26,8 @@
 // ToDo: Remove the TEMPO and use bool based (state) to fetch any latest data
 
 // Struct for Emulator State
-struct EmulatorState {
+class EmulatorState {
+public:
     // ## Core ##
     // CPU Emulator
     uc_engine* uc;

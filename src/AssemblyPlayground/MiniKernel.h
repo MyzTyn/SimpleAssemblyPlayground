@@ -8,7 +8,7 @@
 #ifndef MiniKernel_h
 #define MiniKernel_h
 
-#include <stdio.h>
+#include <stdint.h>
 #include <unordered_map>
 #include <functional>
 
@@ -36,12 +36,12 @@ public:
             it->second(emulator_state);  // Call the handler
         }
         else {
-            handle_unknown_syscall(emulator_state, syscall_num);  // Handle unknown syscalls
+            handle_unknown_syscall(syscall_num, emulator_state);  // Handle unknown syscalls
         }
     }
 private:
     // Handle Unknown syscalls
-    void handle_unknown_syscall(EmulatorState* state, uint32_t syscall_num);
+    void handle_unknown_syscall(uint32_t syscall_num, EmulatorState* state);
 };
 
 // ## Simple Linux Kernel (Syscall) ##

@@ -16,7 +16,7 @@ void MiniKernel::default_linux_syscall() {
     register_syscall(0x04, handle_sys_write);
 }
 
-void MiniKernel::handle_unknown_syscall(EmulatorState* state, uint32_t syscall_num) {
+void MiniKernel::handle_unknown_syscall(uint32_t syscall_num, EmulatorState* state) {
     state->console->AddLog("[SYSCALL] Unknown syscall: %d\n", syscall_num);
 }
 

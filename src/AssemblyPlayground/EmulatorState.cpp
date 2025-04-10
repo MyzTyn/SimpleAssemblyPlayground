@@ -9,6 +9,7 @@
 
 #include "unicorn/unicorn.h"
 #include <stdexcept>
+#include <algorithm>
 
 int reg_ids[] = {
     UC_X86_REG_EAX,
