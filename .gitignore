@@ -1,6 +1,10 @@
 # IMGUI
 imgui.ini
 
+# KDevelop
+.kdev4/
+SimpleAssemblyPlayground.kdev4
+
 # macOS system files
 .DS_Store
 .vs/

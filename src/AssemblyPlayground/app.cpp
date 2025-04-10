@@ -30,10 +30,10 @@ static char assembly_code[1024 * 10] =
 R"(.globl _main
 _main:
     # Print "Hello World"
-    movl    $4, %eax            # Syscall number for sys_write
+    movl    $1, %eax            # Syscall number for sys_write
     movl    $1, %ebx            # File descriptor 1 (stdout)
     movl    $str, %ecx          # Pointer to string
-    movl    $0xD, %edx           # Length of string
+    movl    $0xD, %edx          # Length of string
     int     $0x80               # Invoke syscall
 
     pushl   $2                  # Push second argument (value 2)
@@ -45,14 +45,14 @@ _main:
     movb %al, result+8
 
     # Print "Result: X\n"
-    movl    $4, %eax            # Syscall number for sys_write
+    movl    $1, %eax            # Syscall number for sys_write
     movl    $1, %ebx            # File descriptor 1 (stdout)
     movl    $result, %ecx       # Pointer to result string
-    movl    $0xA, %edx           # Length of string
+    movl    $0xA, %edx          # Length of string
     int     $0x80               # Invoke syscall
 
-    movl    $1, %eax            # Syscall number for exit
-    xorl    %ebx, %ebx            # Exit code 0
+    movl    $0x3C, %eax         # Syscall number for exit
+    xorl    %ebx, %ebx          # Exit code 0
     int     $0x80               # Exit syscall
 sum:
     pushl   %ebp                # Save caller’s base pointer
@@ -86,7 +86,6 @@ Application::Application() : io(ImGui::GetIO()) {
 //    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
     
     ImGui::StyleColorsDark();
-    
     ImGuiStyle& style = ImGui::GetStyle();
     if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
         style.WindowRounding = 0.0f;
@@ -139,7 +138,7 @@ void Application::Render() {
     // Stack Viewer
     ImGui::Begin("Stack Viewer");
     for (int i =  0; i < emulator_state->stack.size(); i++) {
-        ImGui::Text("0x%llX: 0x%X", emulator_state->stack[i].first, emulator_state->stack[i].second);
+        ImGui::Text("0x%lX: 0x%X", emulator_state->stack[i].first, emulator_state->stack[i].second);
         ImGui::Separator();
     }
     ImGui::End();

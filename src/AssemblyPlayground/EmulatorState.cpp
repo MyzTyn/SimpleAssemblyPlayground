@@ -1,5 +1,5 @@
 //
-//  EmulatorState.c
+//  EmulatorState.cpp
 //  ia32_emulator
 //
 //  Created by MyzTyn on 2025/04/07.
@@ -26,8 +26,6 @@ int reg_ids[] = {
 // Hook to catch syscalls (Simple Kernel)
 void hook_syscall(uc_engine *uc, uint32_t intno, void *user_data) {
     EmulatorState* emulator_state = (EmulatorState*)user_data;
-    emulator_state->update_registers();
-    
     emulator_state->kernel.handle_syscall(emulator_state->registers[0], emulator_state);
 }
 
@@ -40,6 +38,7 @@ EmulatorState::EmulatorState(): uc(nullptr), ks(nullptr), registers{}, registere
     if (ks_open(KS_ARCH_X86, KS_MODE_32, &ks) != KS_ERR_OK) {
         throw std::runtime_error("Failed to initialize Keystone engine");
     }
+    // Initialize Capstone
     if (cs_open(CS_ARCH_X86, CS_MODE_32, &capstone) != CS_ERR_OK) {
         throw std::runtime_error("Failed to initialize Capstone engine");
     }
@@ -73,7 +72,7 @@ EmulatorState::~EmulatorState() {
     uc_close(uc);
     ks_close(ks);
     cs_close(&capstone);
-    console = NULL;
+    free(console);
 }
 
 // run to the end

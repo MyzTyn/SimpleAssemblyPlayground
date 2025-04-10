@@ -30,15 +30,7 @@ public:
         syscall_handlers[syscall_num] = handler;
     }
     
-    void handle_syscall(uint32_t syscall_num, EmulatorState* emulator_state) {
-        auto it = syscall_handlers.find(syscall_num);
-        if (it != syscall_handlers.end()) {
-            it->second(emulator_state);  // Call the handler
-        }
-        else {
-            handle_unknown_syscall(syscall_num, emulator_state);  // Handle unknown syscalls
-        }
-    }
+    void handle_syscall(uint32_t syscall_num, EmulatorState* emulator_state);
 private:
     // Handle Unknown syscalls
     void handle_unknown_syscall(uint32_t syscall_num, EmulatorState* state);
