@@ -26,9 +26,6 @@ void MiniKernel::handle_unknown_syscall(uint32_t syscall_num,
 
 void MiniKernel::handle_syscall(uint32_t syscall_num,
                                 EmulatorState *emulator_state) {
-  // Update the registers
-  emulator_state->update_registers();
-
   auto it = syscall_handlers.find(syscall_num);
   if (it != syscall_handlers.end()) {
     it->second(emulator_state); // Call the handler

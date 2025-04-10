@@ -26,7 +26,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/keystone)
 # Add Capstone as a library
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/capstone)
 
-if (UNIX)
+if (UNIX AND NOT APPLE)
     find_package(Vulkan REQUIRED)
     add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/glfw)
 endif()
@@ -58,7 +58,7 @@ elseif (WIN32)
         ${CMAKE_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_dx12.cpp
         ${CMAKE_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_win32.cpp
     )
-elseif (UNIX)
+elseif (UNIX AND NOT APPLE)
     list(APPEND IMGUI_SRC
         ${CMAKE_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_vulkan.cpp
         ${CMAKE_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_glfw.cpp

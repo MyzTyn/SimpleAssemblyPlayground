@@ -18,6 +18,8 @@ int reg_ids[] = {UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ECX,
 // Hook to catch syscalls (Simple Kernel)
 void hook_syscall(uc_engine *uc, uint32_t intno, void *user_data) {
   EmulatorState *emulator_state = (EmulatorState *)user_data;
+  // Update the registers
+  emulator_state->update_registers();
   emulator_state->kernel.handle_syscall(emulator_state->registers[0],
                                         emulator_state);
 }
