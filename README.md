@@ -1,7 +1,7 @@
 # SimpleAssemblyPlayground
 
 A fun little playground to write and run x86 Assembly code (currently using AT&T syntax).  
-This project is cross-platform (Windows & MacOS).
+This project is cross-platform (Windows, Linux & MacOS).
 
 ---
 
@@ -20,7 +20,10 @@ This project is cross-platform (Windows & MacOS).
 
 - CMake
 - A C++14-compatible compiler
-- macOS, Linux (Upcoming), or Windows (cross-platform support)
+- macOS, Linux, or Windows (cross-platform support)
+
+> *Note for Linux users*
+> You may need to install dependencies for glfw (https://www.glfw.org/docs/latest/compile.html)
 
 ### Steps
 
