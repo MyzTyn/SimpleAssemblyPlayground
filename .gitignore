@@ -11,6 +11,7 @@ SimpleAssemblyPlayground.kdev4
 
 # CMake build directories
 build/
+cmake-build-debug/
 
 # Compiled binaries and object files
 *.o
