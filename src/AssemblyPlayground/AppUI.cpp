@@ -12,7 +12,7 @@ Disassembler::~Disassembler() {
     cs_free(instructions, instruction_count);
 }
 
-void Disassembler::Draw() {
+void Disassembler::Draw() const {
   ImGui::Begin("Disassembler");
 
   // Make the window larger by default for better visibility
@@ -54,7 +54,7 @@ void Disassembler::Draw() {
     ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 8));
 
-    clipper.Begin((int)instruction_count);
+    clipper.Begin(static_cast<int>(instruction_count));
 
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -62,7 +62,7 @@ void Disassembler::Draw() {
         bool is_current_pc = (insn.address == current_pc);
 
         // Create a unique ID for this line
-        ImGui::PushID((int)insn.address);
+        ImGui::PushID(static_cast<int>(insn.address));
 
         // Selectable row
         //                bool is_selected = (selected_address == insn.address);
@@ -70,7 +70,7 @@ void Disassembler::Draw() {
         if (ImGui::Selectable("##line", is_selected,
                               ImGuiSelectableFlags_AllowDoubleClick |
                                   ImGuiSelectableFlags_SpanAllColumns,
-                              ImVec2(0, ImGui::GetTextLineHeight() * 1.5f))) {
+                              ImVec2(0, ImGui::GetTextLineHeight() * 1.5F))) {
           //                    selected_address = is_selected ? -1 :
           //                    insn.address;
           if (ImGui::IsMouseDoubleClicked(0)) {
@@ -114,7 +114,7 @@ void Disassembler::Draw() {
         }
 
         // Format the bytes as a string
-        char bytes_str[50] = {0};
+        char bytes_str[50] = {};
         for (int j = 0; j < insn.size; j++) {
           char byte_str[4];
           snprintf(byte_str, sizeof(byte_str), "%02X ", insn.bytes[j]);
@@ -123,18 +123,18 @@ void Disassembler::Draw() {
 
         // ## Memory Address
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.2f, 0.8f, 1.0f, 1.0f), "0x%llX",
-                           (long long unsigned)insn.address);
+        ImGui::TextColored(ImVec4(0.2F, 0.8F, 1.0F, 1.0F), "0x%llX",
+                           insn.address);
 
         // ## PC ICON
         ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f),
+        ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F),
                            is_current_pc ? "->" : "  ");
 
         // ## Instruction
         ImGui::SameLine();
-        ImGui::TextColored(is_current_pc ? ImVec4(1.0f, 1.0f, 0.0f, 1.0f)
-                                         : ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+        ImGui::TextColored(is_current_pc ? ImVec4(1.0F, 1.0F, 0.0F, 1.0F)
+                                         : ImVec4(1.0F, 1.0F, 1.0F, 1.0F),
                            "%s %s", insn.mnemonic, insn.op_str);
 
         // ## Raw code
@@ -224,7 +224,7 @@ void Console::Draw(const char *title) {
   if (ImGui::Button("Options"))
     ImGui::OpenPopup("Options");
   ImGui::SameLine();
-  Filter.Draw("Filter (\"incl,-excl\") (\"error\")", 180);
+  Filter.Draw(R"(Filter ("incl,-excl") ("error"))", 180);
   ImGui::Separator();
 
   // Reserve enough left-over height for 1 separator + 1 input text
@@ -283,10 +283,10 @@ void Console::Draw(const char *title) {
       ImVec4 color;
       bool has_color = false;
       if (strstr(item, "[error]")) {
-        color = ImVec4(1.0f, 0.4f, 0.4f, 1.0f);
+        color = ImVec4(1.0F, 0.4F, 0.4F, 1.0F);
         has_color = true;
       } else if (strncmp(item, "# ", 2) == 0) {
-        color = ImVec4(1.0f, 0.8f, 0.6f, 1.0f);
+        color = ImVec4(1.0F, 0.8F, 0.6F, 1.0F);
         has_color = true;
       }
       if (has_color)
@@ -319,7 +319,7 @@ void Console::Draw(const char *title) {
       ImGuiInputTextFlags_CallbackCompletion |
       ImGuiInputTextFlags_CallbackHistory;
   if (ImGui::InputText("Input", InputBuf, IM_ARRAYSIZE(InputBuf),
-                       input_text_flags, &TextEditCallbackStub, (void *)this)) {
+                       input_text_flags, &TextEditCallbackStub, this)) {
     char *s = InputBuf;
     Strtrim(s);
     if (s[0])

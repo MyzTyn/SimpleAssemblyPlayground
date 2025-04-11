@@ -7,26 +7,33 @@
 
 #include "EmulatorState.h"
 
-#include "unicorn/unicorn.h"
 #include <algorithm>
 #include <stdexcept>
 
-int reg_ids[] = {UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ECX,
+#include "unicorn/unicorn.h"
+
+static int reg_ids[] = {UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ECX,
                  UC_X86_REG_EDX, UC_X86_REG_ESP, UC_X86_REG_EBP,
                  UC_X86_REG_ESI, UC_X86_REG_EDI, UC_X86_REG_EIP};
 
 // Hook to catch syscalls (Simple Kernel)
-void hook_syscall(uc_engine *uc, uint32_t intno, void *user_data) {
-  EmulatorState *emulator_state = (EmulatorState *)user_data;
+static void hook_syscall(uc_engine *uc, uint32_t intno, void *user_data) {
+  auto *emulator_state = static_cast<EmulatorState *>(user_data);
   // Update the registers
   emulator_state->update_registers();
-  emulator_state->kernel.handle_syscall(emulator_state->registers[0],
-                                        emulator_state);
+  emulator_state->kernel.HandleSyscall(emulator_state->registers[0],
+                                       emulator_state);
 }
 
 EmulatorState::EmulatorState()
-    : uc(nullptr), ks(nullptr), registers{}, registeres_ptrs{}, memory{},
-      ESP_Address(0x1500), EBP_Address(0x1500), StartAddress(0x200),
+    : uc(nullptr),
+      ks(nullptr),
+      registers{},
+      register_ptrs{},
+      memory{},
+      ESP_Address(0x1500),
+      EBP_Address(0x1500),
+      StartAddress(0x200),
       END_ADDRESS(0) {
   // Initialize Unicorn engine
   if (uc_open(UC_ARCH_X86, UC_MODE_32, &uc) != UC_ERR_OK) {
@@ -52,12 +59,13 @@ EmulatorState::EmulatorState()
 
   // Assign each element of ptrs to point to the corresponding reg_values
   // element
-  for (int i = 0; i < REG_TOTAL; i++) {
-    registeres_ptrs[i] = &registers[i]; // Store addresses of each element
+  for (int i = 0; i < REGISTERS_TOTAL; i++) {
+    register_ptrs[i] = &registers[i];  // Store addresses of each element
   }
 
   // Map the memory
-  if (uc_mem_map_ptr(uc, 0, MEMSIZE, UC_PROT_ALL, memory.data()) != UC_ERR_OK) {
+  if (uc_mem_map_ptr(uc, 0, MEMORY_SIZE, UC_PROT_ALL, memory.data()) !=
+      UC_ERR_OK) {
     throw std::runtime_error("Failed to map the memory");
   }
 
@@ -65,14 +73,14 @@ EmulatorState::EmulatorState()
   stack.clear();
 
   // Load the default syscalls
-  kernel.default_linux_syscall();
+  kernel.DefaultLinuxSyscall();
 }
 
 EmulatorState::~EmulatorState() {
   uc_close(uc);
   ks_close(ks);
   cs_close(&capstone);
-  console = NULL;
+  console = nullptr;
 }
 
 // run to the end
@@ -98,10 +106,10 @@ void EmulatorState::reset() {
   registers[4] = ESP_Address;
   registers[5] = EBP_Address;
   registers[8] = StartAddress;
-  uc_reg_write_batch(uc, reg_ids, registeres_ptrs.data(), REG_TOTAL);
+  uc_reg_write_batch(uc, reg_ids, register_ptrs.data(), REGISTERS_TOTAL);
   // Clear the cache (Seems fixed the bug: run once then step fn would act like
   // run rather than step by step behaviour)
-  uc_ctl_remove_cache(uc, StartAddress, MEMSIZE);
+  uc_ctl_remove_cache(uc, StartAddress, MEMORY_SIZE);
   // Update it
   update_pc_fn(StartAddress);
   read_stack();
@@ -110,7 +118,8 @@ void EmulatorState::reset() {
 // ToDo: DISPLAY IF ASM CODE ERROR
 // Assmble the assembly code and load to the memory
 void EmulatorState::assemble(const char *value) {
-  size_t count, size;
+  size_t count;
+  size_t size;
   uint8_t *encode;
 
   // Compile the ASM code
@@ -137,7 +146,7 @@ void EmulatorState::assemble(const char *value) {
     update_disassembler_fn(insn, count_t);
     reset();
     // Clear the cache to update the new code
-    uc_ctl_remove_cache(uc, StartAddress, MEMSIZE);
+    uc_ctl_remove_cache(uc, StartAddress, MEMORY_SIZE);
   } else {
     console->AddLog("[error] Failed to disassemble given code!");
   }
@@ -146,22 +155,22 @@ void EmulatorState::assemble(const char *value) {
   free(encode);
 }
 
-void EmulatorState::disassemble(uint8_t *machine_code, size_t size,
-                                cs_insn **insn, size_t *count) {
+void EmulatorState::disassemble(const uint8_t *machine_code, size_t size,
+                                cs_insn **insn, size_t *count) const {
   *count = cs_disasm(capstone, machine_code, size, StartAddress, 0, insn);
 
   if (*count == 0) {
-    *insn = NULL; // Ensure insn is NULL if disassembly fails
+    *insn = nullptr;  // Ensure insn is NULL if disassembly fails
   }
 }
 
 void EmulatorState::update_registers() {
-  uc_reg_read_batch(uc, reg_ids, registeres_ptrs.data(), REG_TOTAL);
+  uc_reg_read_batch(uc, reg_ids, register_ptrs.data(), REGISTERS_TOTAL);
   update_pc_fn(registers[8]);
 }
 
 void EmulatorState::read_stack() {
-  size_t size = ESP_Address - registers[4];
+  const size_t size = ESP_Address - registers[4];
   stack.clear();
 
   if (size == 0) {

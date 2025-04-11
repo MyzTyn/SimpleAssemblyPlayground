@@ -9,7 +9,6 @@
 #define app_h
 
 #include "imgui.h"
-#include <stdio.h>
 
 class Application {
 public:

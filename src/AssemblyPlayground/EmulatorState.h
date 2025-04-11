@@ -10,27 +10,25 @@
 
 #include <array>
 #include <functional>
-#include <stdio.h>
 #include <vector>
 
+#include "AppUI.h"
+#include "MiniKernel.h"
 #include "capstone/capstone.h"
 #include "keystone/keystone.h"
 #include "unicorn/unicorn.h"
 
-#include "AppUI.h"
-#include "MiniKernel.h"
+#define MEMORY_SIZE 0x2000
+#define REGISTERS_TOTAL 9
 
-#define MEMSIZE 0x2000
-#define REG_TOTAL 9
-
-// ToDo: Remove the TEMPO and use bool based (state) to fetch any latest data
+// ToDo: Remove the TEMPO
 
 struct ExecutableData {
   // ## Configuration ##
-  uint32_t ESP_Address;
-  uint32_t EBP_Address;
-  uint32_t StartAddress;
-  uint64_t END_ADDRESS;
+  uint32_t esp_address;
+  uint32_t ebp_address;
+  uint32_t start_address;
+  uint64_t end_address;
   // Assembly Code
   char *code;
 
@@ -39,12 +37,18 @@ struct ExecutableData {
   size_t bin_size;
 
   // ## Disassemble ##
-  cs_insn *insns;
-  size_t *total_insns;
+  cs_insn *instructions;
+  size_t *instructions_total;
+};
+
+struct CpuState {
+  // CPU Registers
+  std::array<uint32_t, REGISTERS_TOTAL> registers;
+  std::array<void *, REGISTERS_TOTAL> register_ptrs;
 };
 
 class EmulatorState {
-public:
+ public:
   // ## Core ##
   // CPU Emulator
   uc_engine *uc;
@@ -55,11 +59,11 @@ public:
   MiniKernel kernel;
 
   // Registers
-  std::array<uint32_t, REG_TOTAL> registers;
-  std::array<void *, REG_TOTAL> registeres_ptrs;
+  std::array<uint32_t, REGISTERS_TOTAL> registers;
+  std::array<void *, REGISTERS_TOTAL> register_ptrs;
 
   // Memory
-  std::array<uint8_t, MEMSIZE> memory;
+  std::array<uint8_t, MEMORY_SIZE> memory;
   // Stack pair<ADDRESS, VALUE>
   std::vector<std::pair<uint64_t, uint32_t>> stack;
 
@@ -89,8 +93,8 @@ public:
   // ToDo: DISPLAY IF ASM CODE ERROR
   // ## Assemble & Disassemble ##
   void assemble(const char *value);
-  void disassemble(uint8_t *machine_code, size_t size, cs_insn **insn,
-                   size_t *count);
+  void disassemble(const uint8_t *machine_code, size_t size, cs_insn **insn,
+                   size_t *count) const;
 
   // ## Update the Registers & Stack ##
   void update_registers();

@@ -121,7 +121,7 @@ Application::~Application() {
 void Application::Render() {
   console.Draw("Console");
   disassembler.Draw();
-  mem_edit.DrawWindow("Memory", emulator_state->memory.data(), MEMSIZE);
+  mem_edit.DrawWindow("Memory", emulator_state->memory.data(), MEMORY_SIZE);
 
   // Assembly Editor
   ImGui::Begin("Assembly Editor");

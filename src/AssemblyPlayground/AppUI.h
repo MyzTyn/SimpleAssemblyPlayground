@@ -8,9 +8,8 @@
 #ifndef AppUI_h
 #define AppUI_h
 
-#include <ctype.h>
+#include <cctype>
 #include <functional>
-#include <stdio.h>
 
 #include "capstone/capstone.h"
 #include "imgui.h"
@@ -29,7 +28,7 @@ struct Disassembler {
   Disassembler() = default;
   ~Disassembler();
 
-  void Draw();
+  void Draw() const;
 };
 
 // Simple Console Window
@@ -66,10 +65,10 @@ struct Console {
   }
   static char *Strdup(const char *s) {
     IM_ASSERT(s);
-    size_t len = strlen(s) + 1;
+    const size_t len = strlen(s) + 1;
     void *buf = ImGui::MemAlloc(len);
     IM_ASSERT(buf);
-    return (char *)memcpy(buf, (const void *)s, len);
+    return static_cast<char *>(memcpy(buf, s, len));
   }
   static void Strtrim(char *s) {
     char *str_end = s + strlen(s);
@@ -89,7 +88,7 @@ struct Console {
   // In C++11 you'd be better off using lambdas for this sort of forwarding
   // callbacks
   static int TextEditCallbackStub(ImGuiInputTextCallbackData *data) {
-    Console *console = (Console *)data->UserData;
+    auto *console = static_cast<Console *>(data->UserData);
     return console->TextEditCallback(data);
   }
 
