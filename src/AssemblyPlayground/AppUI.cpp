@@ -91,6 +91,9 @@ AssemblyCodeEditor::~AssemblyCodeEditor() {
 void AssemblyCodeEditor::Draw() {
   ImGui::Begin("Assembly Code Editor", nullptr, ImGuiWindowFlags_NoCollapse);
 
+  // Make the window larger by default for better visibility
+  ImGui::SetWindowSize(ImVec2(600, 300), ImGuiCond_FirstUseEver);
+
   // Optional: Give a small padding
   ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 
@@ -102,8 +105,7 @@ void AssemblyCodeEditor::Draw() {
   ImGui::PopStyleVar();
 
   // Align compile button to right
-  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + content_region.x -
-                       100);  // 100 is button width
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + content_region.x - 100);  // 100 is button width
   if (ImGui::Button("Compile", ImVec2(100, 0))) {
     Compile();
   }
@@ -112,6 +114,11 @@ void AssemblyCodeEditor::Draw() {
 }
 
 void AssemblyCodeEditor::Compile() const {
+  // Prevent from recompiling twice
+  if (on_duplicate_check(buffer_.c_str())) {
+    return;
+  }
+
   // compiled setup
   uint8_t *compiled_code;
   size_t compiled_size;
@@ -163,11 +170,6 @@ void AssemblyCodeEditor::Compile() const {
   executable_data->instruction_size = instruction_size;
 
   on_compiled(executable_data);
-}
-
-Disassembler::~Disassembler() {
-  if (instructions && instruction_count > 0)
-    cs_free(instructions, instruction_count);
 }
 
 void Disassembler::Draw() const {

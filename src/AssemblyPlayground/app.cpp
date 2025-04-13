@@ -24,56 +24,10 @@
 #include "EmulatorState.h"
 
 // ToDo: Breakpoints
-// ToDo: Redesign the Assembly Editor
 // ToDo: Redo the code for safety
 // ToDo: Create struct for ExecutableData (To avoid recompile twice)
+// ToDo: Clear global vars
 
-static char assembly_code[1024 * 10] =
-    R"(.globl _main
-_main:
-    # Print "Hello World"
-    movl    $1, %eax            # Syscall number for sys_write
-    movl    $1, %ebx            # File descriptor 1 (stdout)
-    movl    $str, %ecx          # Pointer to string
-    movl    $0xD, %edx          # Length of string
-    int     $0x80               # Invoke syscall
-
-    pushl   $2                  # Push second argument (value 2)
-    pushl   $4                  # Push first argument (value 4)
-    call    sum                 # Call sum; return address pushed
-    
-    # Print the result
-    addl $0x30, %eax
-    movb %al, result+8
-
-    # Print "Result: X\n"
-    movl    $1, %eax            # Syscall number for sys_write
-    movl    $1, %ebx            # File descriptor 1 (stdout)
-    movl    $result, %ecx       # Pointer to result string
-    movl    $0xA, %edx          # Length of string
-    int     $0x80               # Invoke syscall
-
-    movl    $0x3C, %eax         # Syscall number for exit
-    xorl    %ebx, %ebx          # Exit code 0
-    int     $0x80               # Exit syscall
-sum:
-    pushl   %ebp                # Save caller’s base pointer
-    movl    %esp, %ebp          # Establish new stack frame
-
-    movl    8(%ebp), %eax       # Load first argument (should be 4)
-    movl    0xC(%ebp), %ebx     # Load second argument (should be 2)
-    addl    %ebx, %eax          # EAX = 4 + 2 = 6
-
-    movl    %ebp, %esp          # Restore ESP to the frame base
-    popl    %ebp                # Restore caller’s base pointer
-    ret                         # Return (pop return address into EIP)
-str:
-    .ascii "Hello World\n\0"
-result:
-    .ascii "Result:  \n"
-)";
-
-//static Console console;
 static Disassembler disassembler;
 static MemoryEditor mem_edit;
 
@@ -83,8 +37,6 @@ const char *reg_names[] = {"EAX", "EBX", "ECX", "EDX", "ESP",
 
 static EmulatorState *emulator_state;
 static AssemblyCodeEditor* assembly_editor;
-// Tempo only
-static const ExecutableData *executable;
 
 Application::Application() : io(ImGui::GetIO()) {
 
@@ -104,11 +56,6 @@ Application::Application() : io(ImGui::GetIO()) {
   assembly_editor = new AssemblyCodeEditor();
 
   // Event callback (Remove those)
-  emulator_state->update_disassembler_fn = [](cs_insn *instructions,
-                                              size_t count) {
-    disassembler.instructions = instructions;
-    disassembler.instruction_count = count;
-  };
   emulator_state->update_pc_fn = [](uint32_t pc) {
     disassembler.current_pc = pc;
   };
@@ -116,17 +63,26 @@ Application::Application() : io(ImGui::GetIO()) {
   disassembler.step_fn = []() { emulator_state->step(); };
   disassembler.reset_fn = []() { emulator_state->reset(); };
 
+  assembly_editor->on_duplicate_check = [](const char* code) -> bool {
+    if (!emulator_state->executable_data || strcmp(code, emulator_state->executable_data->code.c_str()) != 0) {
+      return false;
+    }
+
+    return true;
+  };
+
   assembly_editor->on_compiled = [](const ExecutableData *executable_data) {
-    delete executable;
+    delete emulator_state->executable_data;
+    emulator_state->executable_data = executable_data;
 
     disassembler.instructions = executable_data->instructions;
     disassembler.instruction_count = executable_data->instruction_size;
-    executable = executable_data;
 
     // Set the memory to 0
     emulator_state->memory.fill(0);
     // Copy compiled code to memory_data (single copy)
     std::copy_n(executable_data->bin, executable_data->bin_size, emulator_state->memory.begin() +  executable_data->default_start_address);
+
     emulator_state->reset();
   };
 }
@@ -134,7 +90,6 @@ Application::Application() : io(ImGui::GetIO()) {
 Application::~Application() {
   // Free it
   delete emulator_state;
-  delete executable;
 }
 
 void Application::Render() {
@@ -165,7 +120,7 @@ void Application::Render() {
   ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed, 120.0f);
   ImGui::TableHeadersRow();
 
-  for (int i = 0; i < 9; i++) {
+  for (int i = 0; i < REGISTERS_TOTAL; i++) {
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::Text("%s", reg_names[i]); // Register name

@@ -38,6 +38,7 @@ class  AssemblyCodeEditor {
   // uint64_t default_end_address_;
 public:
   // Callback Event
+  std::function<bool(const char*)> on_duplicate_check;
   std::function<void(const ExecutableData*)> on_compiled;
 
   AssemblyCodeEditor();
@@ -53,13 +54,13 @@ struct Disassembler {
   size_t instruction_count;
   uint32_t current_pc;
 
-  // Tempo (Rework)
+  // Callback Events
   std::function<void()> run_fn;
   std::function<void()> step_fn;
   std::function<void()> reset_fn;
 
   Disassembler() = default;
-  ~Disassembler();
+  ~Disassembler() = default;
 
   void Draw() const;
 };

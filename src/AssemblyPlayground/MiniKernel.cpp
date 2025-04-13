@@ -42,7 +42,7 @@ void handle_sys_read(EmulatorState *) {
 }
 
 void handle_sys_write(EmulatorState *emulator_state) {
-  uint32_t fd = emulator_state->registers[1];   // EBX (file descriptor)
+  const uint32_t fd = emulator_state->registers[1];   // EBX (file descriptor)
   const uint32_t buf = emulator_state->registers[2];  // ECX (buffer address)
   const uint32_t len = emulator_state->registers[3];  // EDX (length)
 

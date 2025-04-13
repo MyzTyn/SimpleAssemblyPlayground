@@ -1,6 +1,6 @@
 //
 //  EmulatorState.h
-//  ia32_emulator
+//  SimpleAssemblyPlayground
 //
 //  Created by MyzTyn on 2025/04/07.
 //
@@ -21,8 +21,6 @@
 #define MEMORY_SIZE 0x2000
 #define REGISTERS_TOTAL 9
 
-// ToDo: Remove the TEMPO
-
 struct ExecutableData {
   // ## Configuration ##
   uint32_t default_eax_value;
@@ -34,7 +32,7 @@ struct ExecutableData {
   uint32_t default_esi_value;
   uint32_t default_edi_value;
   uint32_t default_eip_value;
-  uint32_t default_start_address;
+  uint32_t default_start_address; // AKA EDI
   uint64_t default_end_address;
 
   // Assembly Code
@@ -76,10 +74,6 @@ class EmulatorState {
   // ## Core ##
   // CPU Emulator
   uc_engine *uc;
-  // Assembler
-  ks_engine *ks;
-  // Capstone
-  csh capstone;
   MiniKernel kernel;
 
   // Registers
@@ -92,17 +86,8 @@ class EmulatorState {
   std::vector<std::pair<uint64_t, uint32_t>> stack;
 
   // ## TEMPO ##
-  std::function<void(cs_insn *, size_t)> update_disassembler_fn;
+  const ExecutableData* executable_data;
   std::function<void(uint32_t)> update_pc_fn;
-  //Console *console;
-
-  // ## Configuration ##
-  uint32_t ESP_Address;
-  uint32_t EBP_Address;
-  uint32_t StartAddress;
-
-  // ## ToDo: Move to Like ExecutableData struct or something ##
-  uint64_t END_ADDRESS;
 
   EmulatorState();
   ~EmulatorState();
@@ -113,12 +98,6 @@ class EmulatorState {
   void step();
   // Clear the state
   void reset();
-
-  // ToDo: DISPLAY IF ASM CODE ERROR
-  // ## Assemble & Disassemble ##
-  void assemble(const char *value);
-  void disassemble(const uint8_t *machine_code, size_t size, cs_insn **insn,
-                   size_t *count) const;
 
   // ## Update the Registers & Stack ##
   void update_registers();
