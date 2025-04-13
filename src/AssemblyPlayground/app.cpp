@@ -110,6 +110,9 @@ Application::Application() : io(ImGui::GetIO()) {
   disassembler.run_fn = []() { emulator_state->run(); };
   disassembler.step_fn = []() { emulator_state->step(); };
   disassembler.reset_fn = []() { emulator_state->reset(); };
+  assembly_editor.on_compiled = [](const ExecutableData *executable_data) {
+    delete executable_data;
+  };
 }
 
 Application::~Application() {

@@ -19,6 +19,7 @@ This project is cross-platform (Windows, Linux & MacOS).
 ### Prerequisites
 
 - CMake
+- Python (For Keystone library)
 - A C++14-compatible compiler
 - macOS, Linux, or Windows (cross-platform support)
 

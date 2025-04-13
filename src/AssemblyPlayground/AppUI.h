@@ -12,19 +12,38 @@
 #include <functional>
 
 #include "capstone/capstone.h"
+#include "imgui.h"
 #include "keystone/keystone.h"
 
-#include "imgui.h"
+struct ExecutableData;
 
 // Simple Assembly Code Editor Window
-struct AssemblyCodeEditor {
-  ks_engine *keystone_engine;
-  std::string buffer;
+class  AssemblyCodeEditor {
+  std::string buffer_;
+  ks_engine *keystone_engine_;
+  csh capstone_engine_;
+
+  // ## Configable ##
+  uint32_t default_eax_value_;
+  uint32_t default_ebx_value_;
+  uint32_t default_ecx_value_;
+  uint32_t default_edx_value_;
+  uint32_t default_esp_value_ = 0x1500;
+  uint32_t default_ebp_value_ = 0x1500;
+  uint32_t default_esi_value_;
+  uint32_t default_edi_value_;
+  uint32_t default_eip_value_;
+  uint32_t default_start_address_ = 0x200;
+  // uint64_t default_end_address_;
+public:
+  // Callback Event
+  std::function<void(const ExecutableData*)> on_compiled;
 
   AssemblyCodeEditor();
   ~AssemblyCodeEditor();
 
   void Draw();
+  void Compile();
 };
 
 // Simple Disassembly UI Window

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.5)
 project(SimpleAssemblyPlayground)
 
 set(CMAKE_CXX_STANDARD 14)
@@ -25,6 +25,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/unicorn)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/keystone)
 # Add Capstone as a library
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/capstone)
+
 
 if (UNIX AND NOT APPLE)
     find_package(Vulkan REQUIRED)

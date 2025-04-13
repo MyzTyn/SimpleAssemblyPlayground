@@ -46,7 +46,13 @@ struct ExecutableData {
 
   // ## Disassemble ##
   cs_insn *instructions;
-  size_t *instructions_total;
+  size_t instruction_size;
+
+  // ## Cleanup ##
+  ~ExecutableData() {
+    free(bin);
+    free(instructions);
+  }
 };
 
 // ToDo: Rename to EmulatorState
