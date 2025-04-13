@@ -12,7 +12,20 @@
 #include <functional>
 
 #include "capstone/capstone.h"
+#include "keystone/keystone.h"
+
 #include "imgui.h"
+
+// Simple Assembly Code Editor Window
+struct AssemblyCodeEditor {
+  ks_engine *keystone_engine;
+  std::string buffer;
+
+  AssemblyCodeEditor();
+  ~AssemblyCodeEditor();
+
+  void Draw();
+};
 
 // Simple Disassembly UI Window
 struct Disassembler {

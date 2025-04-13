@@ -38,7 +38,7 @@ include_directories(${CMAKE_SOURCE_DIR}/vendor/capstone/include)
 include_directories(${CMAKE_SOURCE_DIR}/vendor/glfw/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/AssemblyPlayground)  # Include your source folder
 
-include_directories(${CMAKE_SOURCE_DIR}/vendor/imgui/ ${CMAKE_SOURCE_DIR}/vendor/imgui/backends)
+include_directories(${CMAKE_SOURCE_DIR}/vendor/imgui/ ${CMAKE_SOURCE_DIR}/vendor/imgui/backends ${CMAKE_SOURCE_DIR}/vendor/imgui/misc/cpp)
 # Add ImGui source files
 set(IMGUI_SRC
     ${CMAKE_SOURCE_DIR}/vendor/imgui/imgui.cpp
@@ -46,6 +46,7 @@ set(IMGUI_SRC
     ${CMAKE_SOURCE_DIR}/vendor/imgui/imgui_tables.cpp
     ${CMAKE_SOURCE_DIR}/vendor/imgui/imgui_widgets.cpp
     ${CMAKE_SOURCE_DIR}/vendor/imgui/imgui_demo.cpp
+    ${CMAKE_SOURCE_DIR}/vendor/imgui/misc/cpp/imgui_stdlib.cpp
 )
 # Detect platform and add the correct backend
 if (APPLE)

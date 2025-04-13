@@ -7,6 +7,85 @@
 
 #include "AppUI.h"
 
+#include "imgui_stdlib.h"
+
+AssemblyCodeEditor::AssemblyCodeEditor() {
+  // Initialize Keystone assembler for 32-bit x86 (ATT syntax)
+  if (ks_open(KS_ARCH_X86, KS_MODE_32, &keystone_engine) != KS_ERR_OK) {
+    throw std::runtime_error("Failed to initialize Keystone engine");
+  }
+  ks_option(keystone_engine, KS_OPT_SYNTAX, KS_OPT_SYNTAX_ATT);
+
+  // Default Code (Preload)
+  buffer = R"(.globl _main
+_main:
+    # Print "Hello World"
+    movl    $1, %eax            # Syscall number for sys_write
+    movl    $1, %ebx            # File descriptor 1 (stdout)
+    movl    $str, %ecx          # Pointer to string
+    movl    $0xD, %edx          # Length of string
+    int     $0x80               # Invoke syscall
+
+    pushl   $2                  # Push second argument (value 2)
+    pushl   $4                  # Push first argument (value 4)
+    call    sum                 # Call sum; return address pushed
+
+    # Print the result
+    addl $0x30, %eax
+    movb %al, result+8
+
+    # Print "Result: X\n"
+    movl    $1, %eax            # Syscall number for sys_write
+    movl    $1, %ebx            # File descriptor 1 (stdout)
+    movl    $result, %ecx       # Pointer to result string
+    movl    $0xA, %edx          # Length of string
+    int     $0x80               # Invoke syscall
+
+    movl    $0x3C, %eax         # Syscall number for exit
+    xorl    %ebx, %ebx          # Exit code 0
+    int     $0x80               # Exit syscall
+sum:
+    pushl   %ebp                # Save caller’s base pointer
+    movl    %esp, %ebp          # Establish new stack frame
+
+    movl    8(%ebp), %eax       # Load first argument (should be 4)
+    movl    0xC(%ebp), %ebx     # Load second argument (should be 2)
+    addl    %ebx, %eax          # EAX = 4 + 2 = 6
+
+    movl    %ebp, %esp          # Restore ESP to the frame base
+    popl    %ebp                # Restore caller’s base pointer
+    ret                         # Return (pop return address into EIP)
+str:
+    .ascii "Hello World\n\0"
+result:
+    .ascii "Result:  \n"
+)";
+}
+AssemblyCodeEditor::~AssemblyCodeEditor() {
+  ks_close(keystone_engine);
+}
+
+void AssemblyCodeEditor::Draw() {
+  ImGui::Begin("Assembly Code Editor", nullptr, ImGuiWindowFlags_NoCollapse);
+
+  // Optional: Give a small padding
+  ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+
+  // Resize automatically with the window using child region
+  ImVec2 content_region = ImGui::GetContentRegionAvail();
+  ImGui::InputTextMultiline("##asm_editor", &buffer, ImVec2(content_region.x, content_region.y - 25));
+
+  ImGui::PopStyleVar();
+
+  // Align compile button to right
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + content_region.x - 100); // 100 is button width
+  if (ImGui::Button("Compile", ImVec2(100, 0))) {
+    // TODO: Handle compile
+  }
+
+  ImGui::End();
+}
+
 Disassembler::~Disassembler() {
   if (instructions && instruction_count > 0)
     cs_free(instructions, instruction_count);

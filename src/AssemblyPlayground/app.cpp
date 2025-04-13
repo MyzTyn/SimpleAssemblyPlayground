@@ -72,6 +72,7 @@ result:
 )";
 
 static Console console;
+static AssemblyCodeEditor assembly_editor;
 static Disassembler disassembler;
 static MemoryEditor mem_edit;
 
@@ -124,14 +125,15 @@ void Application::Render() {
   mem_edit.DrawWindow("Memory", emulator_state->memory.data(), MEMORY_SIZE);
 
   // Assembly Editor
-  ImGui::Begin("Assembly Editor");
-  ImGui::InputTextMultiline("##asm_editor", assembly_code,
-                            sizeof(assembly_code),
-                            ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 20));
-  if (ImGui::Button("Compile")) {
-    emulator_state->assemble(assembly_code);
-  }
-  ImGui::End();
+  assembly_editor.Draw();
+  // ImGui::Begin("Assembly Editor");
+  // ImGui::InputTextMultiline("##asm_editor", assembly_code,
+  //                           sizeof(assembly_code),
+  //                           ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 20));
+  // if (ImGui::Button("Compile")) {
+  //   emulator_state->assemble(assembly_code);
+  // }
+  // ImGui::End();
 
   // Stack Viewer
   ImGui::Begin("Stack Viewer");

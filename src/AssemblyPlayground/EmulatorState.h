@@ -25,12 +25,20 @@
 
 struct ExecutableData {
   // ## Configuration ##
-  uint32_t esp_address;
-  uint32_t ebp_address;
-  uint32_t start_address;
-  uint64_t end_address;
+  uint32_t default_eax_value;
+  uint32_t default_ebx_value;
+  uint32_t default_ecx_value;
+  uint32_t default_edx_value;
+  uint32_t default_esp_value;
+  uint32_t default_ebp_value;
+  uint32_t default_esi_value;
+  uint32_t default_edi_value;
+  uint32_t default_eip_value;
+  uint32_t default_start_address;
+  uint64_t default_end_address;
+
   // Assembly Code
-  char *code;
+  std::string code;
 
   // ## Bin ##
   uint8_t *bin;
@@ -41,10 +49,20 @@ struct ExecutableData {
   size_t *instructions_total;
 };
 
+// ToDo: Rename to EmulatorState
 struct CpuState {
+  uc_engine *uc;
+
   // CPU Registers
   std::array<uint32_t, REGISTERS_TOTAL> registers;
   std::array<void *, REGISTERS_TOTAL> register_ptrs;
+
+  // Memory
+  std::array<uint8_t, MEMORY_SIZE> memory;
+
+  // Methods
+  void update_registers();
+  void read_stack();
 };
 
 class EmulatorState {
