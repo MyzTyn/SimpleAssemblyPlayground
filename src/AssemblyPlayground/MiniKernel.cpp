@@ -12,6 +12,7 @@
 #include "unicorn/unicorn.h"
 
 #include "EmulatorState.h"
+#include "Console.h"
 
 // Linux Syscall table https://filippo.io/linux-syscall-table/
 void MiniKernel::DefaultLinuxSyscall() {
@@ -22,7 +23,7 @@ void MiniKernel::DefaultLinuxSyscall() {
 
 void MiniKernel::HandleUnknownSyscall(const uint32_t syscall_num,
                                       const EmulatorState *state) {
-  state->console->AddLog("[SYSCALL] Unknown syscall: %d\n", syscall_num);
+  Console::Instance().AddLog("[SYSCALL] Unknown syscall: %d\n", syscall_num);
 }
 
 void MiniKernel::HandleSyscall(const uint32_t syscall_num,
@@ -49,12 +50,12 @@ void handle_sys_write(EmulatorState *emulator_state) {
   char *data = reinterpret_cast<char *>(&emulator_state->memory[buf]);
 
   // Output
-  emulator_state->console->AddLog("%.*s", len, data);
+  Console::Instance().AddLog("%.*s", len, data);
 }
 
 void handle_sys_exit(const EmulatorState *emulator_state) {
   const uint32_t exit_code = emulator_state->registers[1];  // EBX (exit code)
-  emulator_state->console->AddLog("Program exited: %d", exit_code);
+  Console::Instance().AddLog("Program exited: %d", exit_code);
 
   uc_emu_stop(emulator_state->uc);  // Stop the emulation
 }
@@ -62,5 +63,5 @@ void handle_sys_exit(const EmulatorState *emulator_state) {
 void handle_sys_time(EmulatorState *emulator_state) {
   const std::time_t time = std::time(nullptr);
   emulator_state->registers[0] = static_cast<uint32_t>(time);
-  emulator_state->console->AddLog("[SYSCALL]: sys_time: %ld", time);
+  Console::Instance().AddLog("[SYSCALL]: sys_time: %ld", time);
 }

@@ -94,7 +94,7 @@ class EmulatorState {
   // ## TEMPO ##
   std::function<void(cs_insn *, size_t)> update_disassembler_fn;
   std::function<void(uint32_t)> update_pc_fn;
-  Console *console;
+  //Console *console;
 
   // ## Configuration ##
   uint32_t ESP_Address;

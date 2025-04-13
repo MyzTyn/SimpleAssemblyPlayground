@@ -12,6 +12,8 @@
 
 #include "unicorn/unicorn.h"
 
+#include "Console.h"
+
 static int reg_ids[] = {UC_X86_REG_EAX, UC_X86_REG_EBX, UC_X86_REG_ECX,
                  UC_X86_REG_EDX, UC_X86_REG_ESP, UC_X86_REG_EBP,
                  UC_X86_REG_ESI, UC_X86_REG_EDI, UC_X86_REG_EIP};
@@ -80,7 +82,6 @@ EmulatorState::~EmulatorState() {
   uc_close(uc);
   ks_close(ks);
   cs_close(&capstone);
-  console = nullptr;
 }
 
 // run to the end
@@ -124,10 +125,10 @@ void EmulatorState::assemble(const char *value) {
 
   // Compile the ASM code
   if (ks_asm(ks, value, StartAddress, &encode, &size, &count) != KS_ERR_OK) {
-    console->AddLog("ASM code failed to compile!");
+    Console::Instance().AddLog("ASM code failed to compile!");
     return;
   }
-  console->AddLog("ASM code compiled! %zu bytes, statements: %zu", size, count);
+  Console::Instance().AddLog("ASM code compiled! %zu bytes, statements: %zu", size, count);
 
   END_ADDRESS = StartAddress + size;
   // Set the memory to 0
@@ -141,14 +142,14 @@ void EmulatorState::assemble(const char *value) {
 
   disassemble(encode, size, &insn, &count_t);
   if (count_t > 0) {
-    console->AddLog("ASM code disassembled! %zu instructions", count_t);
+    Console::Instance().AddLog("ASM code disassembled! %zu instructions", count_t);
     // Set the data to Disassembler
     update_disassembler_fn(insn, count_t);
     reset();
     // Clear the cache to update the new code
     uc_ctl_remove_cache(uc, StartAddress, MEMORY_SIZE);
   } else {
-    console->AddLog("[error] Failed to disassemble given code!");
+    Console::Instance().AddLog("[error] Failed to disassemble given code!");
   }
 
   // Free encode data

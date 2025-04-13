@@ -20,6 +20,7 @@
 #include "imgui.h"
 
 #include "AppUI.h"
+#include "Console.h"
 #include "EmulatorState.h"
 
 // ToDo: Breakpoints
@@ -72,7 +73,7 @@ result:
     .ascii "Result:  \n"
 )";
 
-static Console console;
+//static Console console;
 static Disassembler disassembler;
 static MemoryEditor mem_edit;
 
@@ -101,7 +102,6 @@ Application::Application() : io(ImGui::GetIO()) {
   // Setup
   emulator_state = new EmulatorState();
   assembly_editor = new AssemblyCodeEditor();
-  emulator_state->console = &console;
 
   // Event callback (Remove those)
   emulator_state->update_disassembler_fn = [](cs_insn *instructions,
@@ -138,7 +138,7 @@ Application::~Application() {
 }
 
 void Application::Render() {
-  console.Draw("Console");
+  Console::Instance().Draw("Console");
   disassembler.Draw();
   mem_edit.DrawWindow("Memory", emulator_state->memory.data(), MEMORY_SIZE);
 
