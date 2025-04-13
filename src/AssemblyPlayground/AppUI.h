@@ -10,6 +10,7 @@
 
 #include <cctype>
 #include <functional>
+#include <string>
 
 #include "capstone/capstone.h"
 #include "imgui.h"

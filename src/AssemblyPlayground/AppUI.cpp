@@ -7,6 +7,8 @@
 
 #include "AppUI.h"
 
+#include <stdexcept>
+
 #include "imgui_stdlib.h"
 #include "keystone/keystone.h"
 
