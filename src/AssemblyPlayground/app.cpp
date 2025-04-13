@@ -6,17 +6,18 @@
 //
 
 #include "app.h"
+
 #include <array>
-#include <imgui.h>
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
 #include "imgui_memory_editor.h"
-
 #include "capstone/capstone.h"
 #include "keystone/keystone.h"
 #include "unicorn/unicorn.h"
+#include "imgui.h"
 
 #include "AppUI.h"
 #include "EmulatorState.h"
@@ -72,7 +73,6 @@ result:
 )";
 
 static Console console;
-static AssemblyCodeEditor assembly_editor;
 static Disassembler disassembler;
 static MemoryEditor mem_edit;
 
@@ -81,8 +81,12 @@ const char *reg_names[] = {"EAX", "EBX", "ECX", "EDX", "ESP",
                            "EBP", "ESI", "EDI", "EIP"};
 
 static EmulatorState *emulator_state;
+static AssemblyCodeEditor* assembly_editor;
+// Tempo only
+static const ExecutableData *executable;
 
 Application::Application() : io(ImGui::GetIO()) {
+
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   //    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -96,6 +100,7 @@ Application::Application() : io(ImGui::GetIO()) {
 
   // Setup
   emulator_state = new EmulatorState();
+  assembly_editor = new AssemblyCodeEditor();
   emulator_state->console = &console;
 
   // Event callback (Remove those)
@@ -110,16 +115,26 @@ Application::Application() : io(ImGui::GetIO()) {
   disassembler.run_fn = []() { emulator_state->run(); };
   disassembler.step_fn = []() { emulator_state->step(); };
   disassembler.reset_fn = []() { emulator_state->reset(); };
-  assembly_editor.on_compiled = [](const ExecutableData *executable_data) {
-    delete executable_data;
+
+  assembly_editor->on_compiled = [](const ExecutableData *executable_data) {
+    delete executable;
+
+    disassembler.instructions = executable_data->instructions;
+    disassembler.instruction_count = executable_data->instruction_size;
+    executable = executable_data;
+
+    // Set the memory to 0
+    emulator_state->memory.fill(0);
+    // Copy compiled code to memory_data (single copy)
+    std::copy_n(executable_data->bin, executable_data->bin_size, emulator_state->memory.begin() +  executable_data->default_start_address);
+    emulator_state->reset();
   };
 }
 
 Application::~Application() {
   // Free it
-  if (emulator_state) {
-    delete emulator_state;
-  }
+  delete emulator_state;
+  delete executable;
 }
 
 void Application::Render() {
@@ -128,15 +143,7 @@ void Application::Render() {
   mem_edit.DrawWindow("Memory", emulator_state->memory.data(), MEMORY_SIZE);
 
   // Assembly Editor
-  assembly_editor.Draw();
-  // ImGui::Begin("Assembly Editor");
-  // ImGui::InputTextMultiline("##asm_editor", assembly_code,
-  //                           sizeof(assembly_code),
-  //                           ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * 20));
-  // if (ImGui::Button("Compile")) {
-  //   emulator_state->assemble(assembly_code);
-  // }
-  // ImGui::End();
+  assembly_editor->Draw();
 
   // Stack Viewer
   ImGui::Begin("Stack Viewer");

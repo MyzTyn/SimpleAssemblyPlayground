@@ -8,6 +8,7 @@
 #include "AppUI.h"
 
 #include "imgui_stdlib.h"
+#include "keystone/keystone.h"
 
 #include "EmulatorState.h"
 
@@ -104,7 +105,7 @@ void AssemblyCodeEditor::Draw() {
   ImGui::End();
 }
 
-void AssemblyCodeEditor::Compile() {
+void AssemblyCodeEditor::Compile() const {
   // compiled setup
   uint8_t *compiled_code;
   size_t compiled_size;

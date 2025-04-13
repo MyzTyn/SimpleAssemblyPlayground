@@ -43,7 +43,7 @@ public:
   ~AssemblyCodeEditor();
 
   void Draw();
-  void Compile();
+  void Compile() const;
 };
 
 // Simple Disassembly UI Window
