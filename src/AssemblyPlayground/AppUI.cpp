@@ -7,13 +7,14 @@
 
 #include "AppUI.h"
 
+#include <imgui_internal.h>
+
 #include <stdexcept>
 
+#include "Console.h"
+#include "EmulatorState.h"
 #include "imgui_stdlib.h"
 #include "keystone/keystone.h"
-
-#include "EmulatorState.h"
-#include "Console.h"
 
 AssemblyCodeEditor::AssemblyCodeEditor()
     : default_eax_value_(0),
@@ -172,7 +173,7 @@ void AssemblyCodeEditor::Compile() const {
   on_compiled(executable_data);
 }
 
-void Disassembler::Draw() const {
+void Disassembler::Draw() {
   ImGui::Begin("Disassembler");
 
   // Make the window larger by default for better visibility
@@ -184,25 +185,27 @@ void Disassembler::Draw() const {
     ImGuiListClipper clipper;
 
     // Display Buttons
-    if (ImGui::SmallButton("Run")) {
+    if (ImGui::Button("Run")) {
       if (run_fn) {
         run_fn();
       }
     }
     ImGui::SameLine();
 
-    if (ImGui::SmallButton("Step")) {
+    if (ImGui::Button("Step")) {
       if (step_fn) {
         step_fn();
       }
     }
     ImGui::SameLine();
 
-    if (ImGui::SmallButton("Reset")) {
+    if (ImGui::Button("Reset")) {
       if (reset_fn) {
         reset_fn();
       }
     }
+    ImGui::SameLine();
+    ImGui::Checkbox("Auto Scroll", &auto_scroll);
 
     ImGui::Separator();
 
@@ -215,6 +218,7 @@ void Disassembler::Draw() const {
     ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 8));
 
     clipper.Begin(static_cast<int>(instruction_count));
+    clipper.IncludeItemsByIndex(0, instruction_count);
 
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
@@ -271,6 +275,9 @@ void Disassembler::Draw() const {
           ImGui::GetWindowDrawList()->AddRectFilled(
               ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
               ImGui::GetColorU32(ImVec4(0.8f, 0.8f, 0.1f, 0.3f)));
+          if (auto_scroll) {
+            ImGui::ScrollToItem(ImGuiScrollFlags_AlwaysCenterX);
+          }
         }
 
         // Format the bytes as a string

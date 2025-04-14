@@ -53,6 +53,7 @@ struct Disassembler {
   cs_insn *instructions;
   size_t instruction_count;
   uint32_t current_pc;
+  bool auto_scroll = true;
 
   // Callback Events
   std::function<void()> run_fn;
@@ -62,7 +63,7 @@ struct Disassembler {
   Disassembler() = default;
   ~Disassembler() = default;
 
-  void Draw() const;
+  void Draw();
 };
 
 #endif /* AppUI_h */
