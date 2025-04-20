@@ -51,3 +51,17 @@ cmake .. -G Xcode
 > You may encounter an "Access Violation" error when executing Unicorn on Windows.
 > This is a known issue with Unicorn (see unicorn-engine/unicorn#1841).
 > It is generally safe to ignore for development and debugging purposes.
+
+## How to Use
+
+Before you begin, make sure to compile the assembly code so it can be executed or debugged.
+
+### Console Window
+- To clear the logs, either enter the `CLEAR` command or right-click in the console window and select **Clear**.
+
+### Disassembly Window
+- To scroll through instructions, make sure **AutoScroll** is disabled.
+- Toggle breakpoints by either:
+  - Double-clicking an instruction
+  - Right-clicking and selecting **Toggle Breakpoint**
+

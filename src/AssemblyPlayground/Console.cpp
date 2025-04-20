@@ -13,10 +13,7 @@ Console::Console() {
 
   // "CLASSIFY" is here to provide the test case where "C"+[tab] completes to
   // "CL" and display multiple matches.
-  Commands.push_back("HELP");
-  Commands.push_back("HISTORY");
   Commands.push_back("CLEAR");
-  Commands.push_back("CLASSIFY");
   AutoScroll = true;
   ScrollToBottom = false;
 }
@@ -44,11 +41,12 @@ void Console::Draw(const char *title) {
 
   ImGui::Begin(title);
 
-  if (ImGui::SmallButton("Clear")) {
-    ClearLog();
-  }
-
-  ImGui::Separator();
+  // You can execute the command or right click the console window to clear it.
+  // if (ImGui::SmallButton("Clear")) {
+  //   ClearLog();
+  // }
+  //
+  // ImGui::Separator();
 
   // Options menu
   if (ImGui::BeginPopup("Options")) {
