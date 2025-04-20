@@ -28,6 +28,17 @@ static void hook_syscall(uc_engine *uc, uint32_t intno, void *user_data) {
                                        emulator_state);
 }
 
+// Hook for Breakpoints
+static void hook_breakpoint(uc_engine *uc, uint64_t address, uint32_t size,
+                            void *user_data) {
+  auto *emulator_state = static_cast<EmulatorState *>(user_data);
+  // Update the registers
+  emulator_state->update_registers();
+  if (emulator_state->has_breakpoint(emulator_state->registers[8])) {
+    uc_emu_stop(emulator_state->uc);
+  }
+}
+
 EmulatorState::EmulatorState()
     : uc(nullptr),
       registers{},
@@ -42,6 +53,9 @@ EmulatorState::EmulatorState()
   // Register the system call
   uc_hook syscall;
   uc_hook_add(uc, &syscall, UC_HOOK_INTR, (void *)hook_syscall, this, 0, 0);
+  uc_hook breakpoint;
+  uc_hook_add(uc, &breakpoint, UC_HOOK_CODE, (void *)hook_breakpoint, this, 0,
+              UINT64_MAX);
 
   // Assign each element of ptrs to point to the corresponding reg_values
   for (int i = 0; i < REGISTERS_TOTAL; i++) {

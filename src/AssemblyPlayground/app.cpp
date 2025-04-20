@@ -85,6 +85,14 @@ Application::Application() : io(ImGui::GetIO()) {
 
     emulator_state->reset();
   };
+
+  emulator_state->has_breakpoint = [](uint64_t address) -> bool {
+    if (disassembler.breakpoints[address]) {
+      disassembler.breakpoints[address] = false;
+      return true;
+    }
+    return false;
+  };
 }
 
 Application::~Application() {

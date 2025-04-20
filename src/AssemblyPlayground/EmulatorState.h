@@ -88,6 +88,7 @@ class EmulatorState {
   // ## TEMPO ##
   const ExecutableData* executable_data;
   std::function<void(uint32_t)> update_pc_fn;
+  std::function<bool(uint64_t)> has_breakpoint;
 
   EmulatorState();
   ~EmulatorState();

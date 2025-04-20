@@ -190,25 +190,25 @@ void Disassembler::Draw() {
 
   // Display Buttons
   if (ImGui::Button("Run")) {
-    if (run_fn) {
-      run_fn();
-    }
+    run_fn();
   }
   ImGui::SameLine();
 
   if (ImGui::Button("Step")) {
-    if (step_fn) {
-      step_fn();
-    }
+    step_fn();
   }
   ImGui::SameLine();
 
   if (ImGui::Button("Reset")) {
-    if (reset_fn) {
-      reset_fn();
-    }
+    reset_fn();
   }
   ImGui::SameLine();
+
+  if (ImGui::Button("Clear Breakpoints")) {
+    breakpoints.clear();
+  }
+  ImGui::SameLine();
+
   ImGui::Checkbox("Auto Scroll", &auto_scroll);
 
   ImGui::Separator();
@@ -237,9 +237,7 @@ void Disassembler::Draw() {
                                 ImGuiSelectableFlags_SpanAllColumns,
                             ImVec2(0, ImGui::GetTextLineHeight() * 1.5F))) {
         if (ImGui::IsMouseDoubleClicked(0)) {
-          // breakpoints.push_back(insn.address);
           ToggleBreakpoint(insn.address);
-          //                        ToggleBreakpoint(insn.address);
         }
       }
 
@@ -247,7 +245,6 @@ void Disassembler::Draw() {
       if (ImGui::BeginPopupContextItem("DisassemblyContextMenu")) {
         if (ImGui::MenuItem("Toggle Breakpoint")) {
           ToggleBreakpoint(insn.address);
-          //                        ToggleBreakpoint(insn.address);
         }
         ImGui::EndPopup();
       }
