@@ -11,6 +11,7 @@
 #include <cctype>
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 #include "capstone/capstone.h"
 #include "keystone/keystone.h"
@@ -18,7 +19,7 @@
 struct ExecutableData;
 
 // Simple Assembly Code Editor Window
-class  AssemblyCodeEditor {
+class AssemblyCodeEditor {
   std::string buffer_;
   ks_engine *keystone_engine_;
   csh capstone_engine_;
@@ -35,10 +36,10 @@ class  AssemblyCodeEditor {
   uint32_t default_eip_value_;
   uint32_t default_start_address_;
   // uint64_t default_end_address_;
-public:
+ public:
   // Callback Event
-  std::function<bool(const char*)> on_duplicate_check;
-  std::function<void(const ExecutableData*)> on_compiled;
+  std::function<bool(const char *)> on_duplicate_check;
+  std::function<void(const ExecutableData *)> on_compiled;
 
   AssemblyCodeEditor();
   ~AssemblyCodeEditor();
@@ -49,10 +50,13 @@ public:
 
 // Simple Disassembly UI Window
 struct Disassembler {
+  // Use ExecutableData?
   cs_insn *instructions;
   size_t instruction_count;
   uint32_t current_pc;
   bool auto_scroll = true;
+
+  std::unordered_map<uint64_t, bool> breakpoints;
 
   // Callback Events
   std::function<void()> run_fn;
@@ -61,6 +65,10 @@ struct Disassembler {
 
   Disassembler() = default;
   ~Disassembler() = default;
+
+  void ToggleBreakpoint(uint64_t address) {
+    breakpoints[address] = !breakpoints[address];
+  }
 
   void Draw();
 };

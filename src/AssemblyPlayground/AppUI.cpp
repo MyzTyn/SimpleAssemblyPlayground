@@ -9,12 +9,11 @@
 
 #include <stdexcept>
 
+#include "Console.h"
+#include "EmulatorState.h"
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 #include "keystone/keystone.h"
-
-#include "Console.h"
-#include "EmulatorState.h"
 
 AssemblyCodeEditor::AssemblyCodeEditor()
     : default_eax_value_(0),
@@ -106,7 +105,8 @@ void AssemblyCodeEditor::Draw() {
   ImGui::PopStyleVar();
 
   // Align compile button to right
-  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + content_region.x - 100);  // 100 is button width
+  ImGui::SetCursorPosX(ImGui::GetCursorPosX() + content_region.x -
+                       100);  // 100 is button width
   if (ImGui::Button("Compile", ImVec2(100, 0))) {
     Compile();
   }
@@ -128,8 +128,7 @@ void AssemblyCodeEditor::Compile() const {
   // Compile the ASM code
   if (ks_asm(keystone_engine_, buffer_.c_str(), default_start_address_,
              &compiled_code, &compiled_size, &compiled_count) != KS_ERR_OK) {
-    // Use callback event to output the logs??
-    Console::Instance().AddLog("ASM code failed to compile!");
+    Console::Instance().AddLog("[error] ASM code failed to compile!");
 
     // Cleanup
     free(compiled_code);
@@ -180,143 +179,126 @@ void Disassembler::Draw() {
   ImGui::SetWindowSize(ImVec2(600, 300), ImGuiCond_FirstUseEver);
 
   // Only draw if we have disassembled instructions
-  if (instructions && instruction_count > 0) {
-    // Use ImGui's clipper for large lists
-    ImGuiListClipper clipper;
-
-    // Display Buttons
-    if (ImGui::Button("Run")) {
-      if (run_fn) {
-        run_fn();
-      }
-    }
-    ImGui::SameLine();
-
-    if (ImGui::Button("Step")) {
-      if (step_fn) {
-        step_fn();
-      }
-    }
-    ImGui::SameLine();
-
-    if (ImGui::Button("Reset")) {
-      if (reset_fn) {
-        reset_fn();
-      }
-    }
-    ImGui::SameLine();
-    ImGui::Checkbox("Auto Scroll", &auto_scroll);
-
-    ImGui::Separator();
-
-    // Create a child window for scrolling with visible border
-    ImGui::BeginChild("##disassembly", ImVec2(0, 0), true,
-                      ImGuiWindowFlags_HorizontalScrollbar);
-
-    // Make text bigger for better visibility
-    ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
-    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 8));
-
-    clipper.Begin(static_cast<int>(instruction_count));
-    clipper.IncludeItemsByIndex(0, instruction_count);
-
-    while (clipper.Step()) {
-      for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-        cs_insn &insn = instructions[i];
-        const bool is_current_pc = (insn.address == current_pc);
-
-        // Create a unique ID for this line
-        ImGui::PushID(static_cast<int>(insn.address));
-
-        // Selectable row
-        //                bool is_selected = (selected_address == insn.address);
-        bool is_selected = false;
-        if (ImGui::Selectable("##line", is_selected,
-                              ImGuiSelectableFlags_AllowDoubleClick |
-                                  ImGuiSelectableFlags_SpanAllColumns,
-                              ImVec2(0, ImGui::GetTextLineHeight() * 1.5F))) {
-          //                    selected_address = is_selected ? -1 :
-          //                    insn.address;
-          if (ImGui::IsMouseDoubleClicked(0)) {
-            //                        ToggleBreakpoint(insn.address);
-          }
-        }
-
-        // Right-click context menu
-        if (ImGui::BeginPopupContextItem("DisassemblyContextMenu")) {
-          if (ImGui::MenuItem("Toggle Breakpoint")) {
-            //                        ToggleBreakpoint(insn.address);
-          }
-          if (ImGui::MenuItem("Copy Address")) {
-            char buf[16];
-            snprintf(buf, sizeof(buf), "0x%llX", insn.address);
-            ImGui::SetClipboardText(buf);
-          }
-          ImGui::EndPopup();
-        }
-
-        // Highlighting
-        if (is_selected) {
-          ImGui::SetItemDefaultFocus();
-          ImGui::GetWindowDrawList()->AddRectFilled(
-              ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-              ImGui::GetColorU32(ImGuiCol_HeaderActive));
-        }
-        //                else if (HasBreakpoint(insn.address)) {
-        //                    ImGui::GetWindowDrawList()->AddRectFilled(
-        //                        ImGui::GetItemRectMin(),
-        //                        ImGui::GetItemRectMax(),
-        //                        ImGui::GetColorU32(ImVec4(0.8f, 0.1f, 0.1f,
-        //                        0.3f))
-        //                    );
-        //                }
-        else if (is_current_pc) {
-          ImGui::GetWindowDrawList()->AddRectFilled(
-              ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-              ImGui::GetColorU32(ImVec4(0.8f, 0.8f, 0.1f, 0.3f)));
-          if (auto_scroll) {
-            ImGui::ScrollToItem(ImGuiScrollFlags_AlwaysCenterX);
-          }
-        }
-
-        // Format the bytes as a string
-        char bytes_str[50] = {};
-        for (int j = 0; j < insn.size; j++) {
-          char byte_str[4];
-          snprintf(byte_str, sizeof(byte_str), "%02X ", insn.bytes[j]);
-          strcat(bytes_str, byte_str);
-        }
-
-        // ## Memory Address
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(0.2F, 0.8F, 1.0F, 1.0F), "0x%llX",
-                           insn.address);
-
-        // ## PC ICON
-        ImGui::SameLine();
-        ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F),
-                           is_current_pc ? "->" : "  ");
-
-        // ## Instruction
-        ImGui::SameLine();
-        ImGui::TextColored(is_current_pc ? ImVec4(1.0F, 1.0F, 0.0F, 1.0F)
-                                         : ImVec4(1.0F, 1.0F, 1.0F, 1.0F),
-                           "%s %s", insn.mnemonic, insn.op_str);
-
-        // ## Raw code
-        ImGui::SameLine();
-        ImGui::TextDisabled("; %s", bytes_str);
-
-        ImGui::PopID();
-      }
-    }
-
-    ImGui::PopStyleVar();
-    ImGui::PopFont();
-    ImGui::EndChild();
-  } else {
+  if (!instructions || instruction_count <= 0) {
     ImGui::Text("No instructions disassembled");
+    ImGui::End();
+    return;
   }
 
+  // Use ImGui's clipper for large lists
+  ImGuiListClipper clipper;
+
+  // Display Buttons
+  if (ImGui::Button("Run")) {
+    if (run_fn) {
+      run_fn();
+    }
+  }
+  ImGui::SameLine();
+
+  if (ImGui::Button("Step")) {
+    if (step_fn) {
+      step_fn();
+    }
+  }
+  ImGui::SameLine();
+
+  if (ImGui::Button("Reset")) {
+    if (reset_fn) {
+      reset_fn();
+    }
+  }
+  ImGui::SameLine();
+  ImGui::Checkbox("Auto Scroll", &auto_scroll);
+
+  ImGui::Separator();
+
+  // Create a child window for scrolling with visible border
+  ImGui::BeginChild("##disassembly", ImVec2(0, 0), true,
+                    ImGuiWindowFlags_HorizontalScrollbar);
+
+  // Make text bigger for better visibility
+  ImGui::PushFont(ImGui::GetIO().Fonts->Fonts[0]);
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 8));
+
+  clipper.Begin(static_cast<int>(instruction_count));
+  clipper.IncludeItemsByIndex(0, instruction_count);
+
+  while (clipper.Step()) {
+    for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
+      cs_insn &insn = instructions[i];
+      const bool is_current_pc = (insn.address == current_pc);
+
+      // Create a unique ID for this line
+      ImGui::PushID(static_cast<int>(insn.address));
+
+      if (ImGui::Selectable("##line", false,
+                            ImGuiSelectableFlags_AllowDoubleClick |
+                                ImGuiSelectableFlags_SpanAllColumns,
+                            ImVec2(0, ImGui::GetTextLineHeight() * 1.5F))) {
+        if (ImGui::IsMouseDoubleClicked(0)) {
+          // breakpoints.push_back(insn.address);
+          ToggleBreakpoint(insn.address);
+          //                        ToggleBreakpoint(insn.address);
+        }
+      }
+
+      // Right-click context menu
+      if (ImGui::BeginPopupContextItem("DisassemblyContextMenu")) {
+        if (ImGui::MenuItem("Toggle Breakpoint")) {
+          ToggleBreakpoint(insn.address);
+          //                        ToggleBreakpoint(insn.address);
+        }
+        ImGui::EndPopup();
+      }
+
+      // Highlighting
+      if (breakpoints[insn.address]) {
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
+            ImGui::GetColorU32(ImVec4(0.8f, 0.1f, 0.1f, 0.3f)));
+      } else if (is_current_pc) {
+        ImGui::GetWindowDrawList()->AddRectFilled(
+            ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
+            ImGui::GetColorU32(ImVec4(0.8f, 0.8f, 0.1f, 0.3f)));
+        if (auto_scroll) {
+          ImGui::ScrollToItem(ImGuiScrollFlags_AlwaysCenterX);
+        }
+      }
+
+      // Format the bytes as a string
+      char bytes_str[50] = {};
+      for (int j = 0; j < insn.size; j++) {
+        char byte_str[4];
+        snprintf(byte_str, sizeof(byte_str), "%02X ", insn.bytes[j]);
+        strcat(bytes_str, byte_str);
+      }
+
+      // ## Memory Address
+      ImGui::SameLine();
+      ImGui::TextColored(ImVec4(0.2F, 0.8F, 1.0F, 1.0F), "0x%lX", insn.address);
+
+      // ## PC ICON
+      ImGui::SameLine();
+      ImGui::TextColored(ImVec4(1.0F, 1.0F, 0.0F, 1.0F),
+                         is_current_pc ? "->" : "  ");
+
+      // ## Instruction
+      ImGui::SameLine();
+      ImGui::TextColored(is_current_pc ? ImVec4(1.0F, 1.0F, 0.0F, 1.0F)
+                                       : ImVec4(1.0F, 1.0F, 1.0F, 1.0F),
+                         "%s %s", insn.mnemonic, insn.op_str);
+
+      // ## Raw code
+      ImGui::SameLine();
+      ImGui::TextDisabled("; %s", bytes_str);
+
+      ImGui::PopID();
+    }
+  }
+
+  ImGui::PopStyleVar();
+  ImGui::PopFont();
+  ImGui::EndChild();
   ImGui::End();
 }
