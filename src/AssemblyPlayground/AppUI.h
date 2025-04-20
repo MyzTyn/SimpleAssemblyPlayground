@@ -13,7 +13,6 @@
 #include <string>
 
 #include "capstone/capstone.h"
-#include "imgui.h"
 #include "keystone/keystone.h"
 
 struct ExecutableData;

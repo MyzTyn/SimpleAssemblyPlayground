@@ -7,14 +7,14 @@
 
 #include "AppUI.h"
 
-#include <imgui_internal.h>
-
 #include <stdexcept>
+
+#include "imgui_internal.h"
+#include "imgui_stdlib.h"
+#include "keystone/keystone.h"
 
 #include "Console.h"
 #include "EmulatorState.h"
-#include "imgui_stdlib.h"
-#include "keystone/keystone.h"
 
 AssemblyCodeEditor::AssemblyCodeEditor()
     : default_eax_value_(0),
@@ -223,7 +223,7 @@ void Disassembler::Draw() {
     while (clipper.Step()) {
       for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
         cs_insn &insn = instructions[i];
-        bool is_current_pc = (insn.address == current_pc);
+        const bool is_current_pc = (insn.address == current_pc);
 
         // Create a unique ID for this line
         ImGui::PushID(static_cast<int>(insn.address));
@@ -249,8 +249,7 @@ void Disassembler::Draw() {
           }
           if (ImGui::MenuItem("Copy Address")) {
             char buf[16];
-            snprintf(buf, sizeof(buf), "0x%llX",
-                     (long long unsigned)insn.address);
+            snprintf(buf, sizeof(buf), "0x%llX", insn.address);
             ImGui::SetClipboardText(buf);
           }
           ImGui::EndPopup();
