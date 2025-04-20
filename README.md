@@ -3,6 +3,8 @@
 A fun little playground to write and run x86 Assembly code (currently using AT&T syntax).  
 This project is cross-platform (Windows, Linux & MacOS).
 
+Feel free to contribute to the project!
+
 ---
 
 ## ✨ Features
@@ -10,7 +12,7 @@ This project is cross-platform (Windows, Linux & MacOS).
 - IA-32 (x86) assembly execution
 - Memory Editor
 - AT&T syntax parsing
-- Playground-style interface
+- Basic Breakpoint
 
 ---
 
@@ -19,7 +21,7 @@ This project is cross-platform (Windows, Linux & MacOS).
 ### Prerequisites
 
 - CMake
-- Python (For Keystone library)
+- Python (For Keystone library), pkg-config
 - A C++14-compatible compiler
 - macOS, Linux, or Windows (cross-platform support)
 
