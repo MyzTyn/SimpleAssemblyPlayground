@@ -33,7 +33,7 @@ class AssemblyCodeEditor {
   uint32_t default_ebp_value_;
   uint32_t default_esi_value_;
   uint32_t default_edi_value_;
-  uint32_t default_eip_value_;
+  // uint32_t default_eip_value_;
   uint32_t default_start_address_;
   // uint64_t default_end_address_;
  public:

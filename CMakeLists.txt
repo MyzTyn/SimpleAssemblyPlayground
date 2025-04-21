@@ -108,5 +108,7 @@ elseif (UNIX)
 )
 endif()
 
+target_compile_options(keystone PRIVATE -Wno-template-body)
+
 # Link against libs statically
 target_link_libraries(SimpleAssemblyPlayground PRIVATE unicorn keystone capstone fmt::fmt)

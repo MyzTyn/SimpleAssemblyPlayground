@@ -11,6 +11,7 @@
 #include <cinttypes>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "imgui_memory_editor.h"
 #include "capstone/capstone.h"

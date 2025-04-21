@@ -31,8 +31,9 @@ struct ExecutableData {
   uint32_t default_ebp_value;
   uint32_t default_esi_value;
   uint32_t default_edi_value;
-  uint32_t default_eip_value;
-  uint32_t default_start_address; // AKA EDI
+  // ToDo: Use EIP instead of start
+  // uint32_t default_eip_value;
+  uint32_t default_start_address; // AKA EIP
   uint64_t default_end_address;
 
   // Assembly Code

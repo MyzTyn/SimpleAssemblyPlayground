@@ -28,7 +28,7 @@ AssemblyCodeEditor::AssemblyCodeEditor()
       default_ebp_value_(0x1500),
       default_esi_value_(0),
       default_edi_value_(0),
-      default_eip_value_(0),
+      // default_eip_value_(0),
       default_start_address_(0x200) {
   // Initialize Keystone assembler for 32-bit x86 (ATT syntax)
   if (ks_open(KS_ARCH_X86, KS_MODE_32, &keystone_engine_) != KS_ERR_OK) {
@@ -160,7 +160,7 @@ void AssemblyCodeEditor::Compile() const {
   executable_data->default_ebp_value = default_ebp_value_;
   executable_data->default_esi_value = default_esi_value_;
   executable_data->default_edi_value = default_edi_value_;
-  executable_data->default_eip_value = default_eip_value_;
+  // executable_data->default_eip_value = default_eip_value_;
   executable_data->default_start_address = default_start_address_;
   executable_data->default_end_address = default_start_address_ + compiled_size;
 

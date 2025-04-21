@@ -107,7 +107,6 @@ void EmulatorState::reset() {
   registers[6] = executable_data->default_esi_value;
   registers[7] = executable_data->default_edi_value;
   registers[8] = executable_data->default_start_address;
-  registers[9] = executable_data->default_eip_value;
 
   uc_reg_write_batch(uc, reg_ids, register_ptrs.data(), REGISTERS_TOTAL);
   // Clear the cache (Seems fixed the bug: run once then step fn would act like
