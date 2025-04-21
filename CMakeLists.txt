@@ -84,7 +84,7 @@ elseif (WIN32)
     list(APPEND SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/src/Platform/Windows/main_win32_dx12.cpp
     )
-elseif (UNIX)
+elseif (UNIX AND NOT APPLE)
     list(APPEND SOURCE_FILES
         ${CMAKE_SOURCE_DIR}/src/Platform/Linux/main_glfw_vulkan.cpp
     )
@@ -100,15 +100,15 @@ if (APPLE)
     target_compile_options(capstone PRIVATE -Wno-conversion -Wno-sign-compare -Wno-ignored-qualifiers -Wno-unused-parameter -Wno-missing-field-initializers)
 elseif (WIN32)
     target_link_libraries(SimpleAssemblyPlayground PRIVATE d3d12.lib dxgi.lib d3dcompiler.lib dxguid.lib)
-elseif (UNIX)
+elseif (UNIX AND NOT APPLE)
     target_link_libraries(SimpleAssemblyPlayground PRIVATE glfw Vulkan::Vulkan)
+    target_compile_options(keystone PRIVATE -Wno-template-body)
     target_compile_definitions(SimpleAssemblyPlayground PRIVATE
     GLFW_INCLUDE_NONE
     GLFW_INCLUDE_VULKAN
 )
 endif()
 
-target_compile_options(keystone PRIVATE -Wno-template-body)
 
 # Link against libs statically
 target_link_libraries(SimpleAssemblyPlayground PRIVATE unicorn keystone capstone fmt::fmt)
