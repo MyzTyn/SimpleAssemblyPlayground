@@ -25,21 +25,23 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/unicorn)
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/keystone)
 # Add Capstone as a library
 add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/capstone)
-
+# Add fmt library
+add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/fmt)
 
 if (UNIX AND NOT APPLE)
     find_package(Vulkan REQUIRED)
     add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/glfw)
+    include_directories(${CMAKE_SOURCE_DIR}/vendor/glfw/include)
 endif()
 
 # Include directories
 include_directories(${CMAKE_SOURCE_DIR}/vendor/unicorn/include)
 include_directories(${CMAKE_SOURCE_DIR}/vendor/keystone/include)
 include_directories(${CMAKE_SOURCE_DIR}/vendor/capstone/include)
-include_directories(${CMAKE_SOURCE_DIR}/vendor/glfw/include)
+include_directories(${CMAKE_SOURCE_DIR}/vendor/fmt/include)
 include_directories(${CMAKE_SOURCE_DIR}/src/AssemblyPlayground)  # Include your source folder
-
 include_directories(${CMAKE_SOURCE_DIR}/vendor/imgui/ ${CMAKE_SOURCE_DIR}/vendor/imgui/backends ${CMAKE_SOURCE_DIR}/vendor/imgui/misc/cpp)
+
 # Add ImGui source files
 set(IMGUI_SRC
     ${CMAKE_SOURCE_DIR}/vendor/imgui/imgui.cpp
@@ -93,13 +95,13 @@ add_executable(SimpleAssemblyPlayground ${SOURCE_FILES} ${IMGUI_SRC})
 
 # macOS: Link frameworks
 if (APPLE)
-    target_link_libraries(SimpleAssemblyPlayground "-framework Metal" "-framework MetalKit" "-framework Cocoa" "-framework GameController" "-framework QuartzCore" "-framework AppKit")
+    target_link_libraries(SimpleAssemblyPlayground PRIVATE "-framework Metal" "-framework MetalKit" "-framework Cocoa" "-framework GameController" "-framework QuartzCore" "-framework AppKit")
     # Mark several errors as warning to get it work
     target_compile_options(capstone PRIVATE -Wno-conversion -Wno-sign-compare -Wno-ignored-qualifiers -Wno-unused-parameter -Wno-missing-field-initializers)
 elseif (WIN32)
-    target_link_libraries(SimpleAssemblyPlayground d3d12.lib dxgi.lib d3dcompiler.lib dxguid.lib)
+    target_link_libraries(SimpleAssemblyPlayground PRIVATE d3d12.lib dxgi.lib d3dcompiler.lib dxguid.lib)
 elseif (UNIX)
-    target_link_libraries(SimpleAssemblyPlayground glfw Vulkan::Vulkan)
+    target_link_libraries(SimpleAssemblyPlayground PRIVATE glfw Vulkan::Vulkan)
     target_compile_definitions(SimpleAssemblyPlayground PRIVATE
     GLFW_INCLUDE_NONE
     GLFW_INCLUDE_VULKAN
@@ -107,5 +109,4 @@ elseif (UNIX)
 endif()
 
 # Link against libs statically
-target_link_libraries(SimpleAssemblyPlayground unicorn keystone capstone)
-
+target_link_libraries(SimpleAssemblyPlayground PRIVATE unicorn keystone capstone fmt::fmt)

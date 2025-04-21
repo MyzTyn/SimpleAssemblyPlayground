@@ -8,12 +8,16 @@
 #include "AppUI.h"
 
 #include <stdexcept>
+#include <string>
+#include <cinttypes>
 
-#include "Console.h"
-#include "EmulatorState.h"
+#include "fmt/format.h"
 #include "imgui_internal.h"
 #include "imgui_stdlib.h"
 #include "keystone/keystone.h"
+
+#include "Console.h"
+#include "EmulatorState.h"
 
 AssemblyCodeEditor::AssemblyCodeEditor()
     : default_eax_value_(0),
@@ -226,54 +230,51 @@ void Disassembler::Draw() {
 
   while (clipper.Step()) {
     for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++) {
-      cs_insn &insn = instructions[i];
-      const bool is_current_pc = (insn.address == current_pc);
+      cs_insn &instruction = instructions[i];
+      const bool is_current_pc = (instruction.address == current_pc);
 
       // Create a unique ID for this line
-      ImGui::PushID(static_cast<int>(insn.address));
+      ImGui::PushID(static_cast<int>(instruction.address));
 
       if (ImGui::Selectable("##line", false,
                             ImGuiSelectableFlags_AllowDoubleClick |
                                 ImGuiSelectableFlags_SpanAllColumns,
                             ImVec2(0, ImGui::GetTextLineHeight() * 1.5F))) {
         if (ImGui::IsMouseDoubleClicked(0)) {
-          ToggleBreakpoint(insn.address);
+          ToggleBreakpoint(instruction.address);
         }
       }
 
       // Right-click context menu
       if (ImGui::BeginPopupContextItem("DisassemblyContextMenu")) {
         if (ImGui::MenuItem("Toggle Breakpoint")) {
-          ToggleBreakpoint(insn.address);
+          ToggleBreakpoint(instruction.address);
         }
         ImGui::EndPopup();
       }
 
       // Highlighting
-      if (breakpoints[insn.address]) {
+      if (breakpoints[instruction.address]) {
         ImGui::GetWindowDrawList()->AddRectFilled(
             ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-            ImGui::GetColorU32(ImVec4(0.8f, 0.1f, 0.1f, 0.3f)));
+            ImGui::GetColorU32(ImVec4(0.8F, 0.1F, 0.1F, 0.3F)));
       } else if (is_current_pc) {
         ImGui::GetWindowDrawList()->AddRectFilled(
             ImGui::GetItemRectMin(), ImGui::GetItemRectMax(),
-            ImGui::GetColorU32(ImVec4(0.8f, 0.8f, 0.1f, 0.3f)));
+            ImGui::GetColorU32(ImVec4(0.8F, 0.8F, 0.1F, 0.3F)));
         if (auto_scroll) {
           ImGui::ScrollToItem(ImGuiScrollFlags_AlwaysCenterX);
         }
       }
 
-      // Format the bytes as a string
-      char bytes_str[50] = {};
-      for (int j = 0; j < insn.size; j++) {
-        char byte_str[4];
-        snprintf(byte_str, sizeof(byte_str), "%02X ", insn.bytes[j]);
-        strcat(bytes_str, byte_str);
+      std::string bytes_str = { "; " };
+      for (int j = 0; j < instruction.size; j++) {
+        bytes_str += fmt::format("{:02X} ", instruction.bytes[j]);
       }
 
       // ## Memory Address
       ImGui::SameLine();
-      ImGui::TextColored(ImVec4(0.2F, 0.8F, 1.0F, 1.0F), "0x%lX", insn.address);
+      ImGui::TextColored(ImVec4(0.2F, 0.8F, 1.0F, 1.0F), "0x%" PRIu64, instruction.address);
 
       // ## PC ICON
       ImGui::SameLine();
@@ -284,11 +285,11 @@ void Disassembler::Draw() {
       ImGui::SameLine();
       ImGui::TextColored(is_current_pc ? ImVec4(1.0F, 1.0F, 0.0F, 1.0F)
                                        : ImVec4(1.0F, 1.0F, 1.0F, 1.0F),
-                         "%s %s", insn.mnemonic, insn.op_str);
+                         "%s %s", instruction.mnemonic, instruction.op_str);
 
       // ## Raw code
       ImGui::SameLine();
-      ImGui::TextDisabled("; %s", bytes_str);
+      ImGui::TextDisabled("%s", bytes_str.c_str());
 
       ImGui::PopID();
     }
