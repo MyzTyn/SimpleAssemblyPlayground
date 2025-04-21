@@ -16,11 +16,11 @@ public:
   ~Application();
 
   void Render();
-  ImVec4 &GetClearColor() { return clear_color; }
+  ImVec4 &GetClearColor() { return clear_color_; }
 
 private:
-  ImGuiIO &io;
-  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  ImGuiIO &io_;
+  ImVec4 clear_color_ = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 };
 
 #endif /* app_h */

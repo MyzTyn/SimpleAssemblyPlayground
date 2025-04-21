@@ -8,8 +8,7 @@
 #include "app.h"
 
 #include <array>
-#include <algorithm>
-#include <stdexcept>
+#include <cinttypes>
 #include <string>
 #include <vector>
 
@@ -23,9 +22,7 @@
 #include "Console.h"
 #include "EmulatorState.h"
 
-// ToDo: Breakpoints
 // ToDo: Redo the code for safety
-// ToDo: Create struct for ExecutableData (To avoid recompile twice)
 // ToDo: Clear global vars
 
 static Disassembler disassembler;
@@ -38,15 +35,15 @@ const char *reg_names[] = {"EAX", "EBX", "ECX", "EDX", "ESP",
 static EmulatorState *emulator_state;
 static AssemblyCodeEditor* assembly_editor;
 
-Application::Application() : io(ImGui::GetIO()) {
+Application::Application() : io_(ImGui::GetIO()) {
 
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  io_.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io_.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
   //    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
   ImGui::StyleColorsDark();
   ImGuiStyle &style = ImGui::GetStyle();
-  if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+  if (io_.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
     style.WindowRounding = 0.0f;
     style.Colors[ImGuiCol_WindowBg].w = 1.0f;
   }
@@ -110,9 +107,9 @@ void Application::Render() {
 
   // Stack Viewer
   ImGui::Begin("Stack Viewer");
-  for (int i = 0; i < emulator_state->stack.size(); i++) {
-    ImGui::Text("0x%lX: 0x%X", emulator_state->stack[i].first,
-                emulator_state->stack[i].second);
+  for (const auto & i : emulator_state->stack) {
+    ImGui::Text("0x%" PRIX64 ": 0x%04" PRIX32, i.first,
+                i.second);
     ImGui::Separator();
   }
   ImGui::End();
@@ -124,8 +121,8 @@ void Application::Render() {
                     ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg);
 
   // Table headers
-  ImGui::TableSetupColumn("Register", ImGuiTableColumnFlags_WidthFixed, 100.0f);
-  ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed, 120.0f);
+  ImGui::TableSetupColumn("Register", ImGuiTableColumnFlags_WidthFixed, 100.0F);
+  ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthFixed, 120.0F);
   ImGui::TableHeadersRow();
 
   for (int i = 0; i < REGISTERS_TOTAL; i++) {
@@ -134,7 +131,7 @@ void Application::Render() {
     ImGui::Text("%s", reg_names[i]); // Register name
 
     ImGui::TableSetColumnIndex(1);
-    ImGui::Text("0x%08X", emulator_state->registers[i]);
+    ImGui::Text("0x%08" PRIX32, emulator_state->registers[i]);
   }
 
   ImGui::EndTable();

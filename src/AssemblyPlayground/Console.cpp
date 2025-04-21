@@ -41,13 +41,6 @@ void Console::Draw(const char *title) {
 
   ImGui::Begin(title);
 
-  // You can execute the command or right click the console window to clear it.
-  // if (ImGui::SmallButton("Clear")) {
-  //   ClearLog();
-  // }
-  //
-  // ImGui::Separator();
-
   // Options menu
   if (ImGui::BeginPopup("Options")) {
     ImGui::Checkbox("Auto-scroll", &AutoScroll);
@@ -203,7 +196,7 @@ int Console::TextEditCallback(ImGuiInputTextCallbackData *data) {
         // Multiple matches. Complete as much as we can..
         // So inputting "C"+Tab will complete to "CL" then display "CLEAR" and
         // "CLASSIFY" as matches.
-        int match_len = (int)(word_end - word_start);
+        int match_len = static_cast<int>(word_end - word_start);
         for (;;) {
           int c = 0;
           bool all_candidates_matches = true;
@@ -217,8 +210,8 @@ int Console::TextEditCallback(ImGuiInputTextCallbackData *data) {
         }
 
         if (match_len > 0) {
-          data->DeleteChars((int)(word_start - data->Buf),
-                            (int)(word_end - word_start));
+          data->DeleteChars(static_cast<int>(word_start - data->Buf),
+                            static_cast<int>(word_end - word_start));
           data->InsertChars(data->CursorPos, candidates[0],
                             candidates[0] + match_len);
         }

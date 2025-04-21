@@ -7,7 +7,6 @@
 
 #include "EmulatorState.h"
 
-#include <algorithm>
 #include <stdexcept>
 
 #include "unicorn/unicorn.h"
